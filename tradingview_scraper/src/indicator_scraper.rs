@@ -1,6 +1,8 @@
 use std::{future::Future, sync::Arc};
 use std::pin::Pin;
 
+use async_fs::OpenOptions;
+use futures_lite::AsyncWriteExt;
 use scraper::ScrapeOperation;
 use simple_error::SimpleResult;
 use async_executor::Executor;
@@ -12,6 +14,7 @@ use crate::utilities;
 pub struct IndicatorScraper {
     pub auth_token: String,
     pub symbol: String,
+    pub session: String,
     pub timeframe: String,
     pub range: usize,
     pub indicator: String,
@@ -21,16 +24,17 @@ impl ScrapeOperation for IndicatorScraper {
     fn execute(&self, executor: Arc<Executor<'static>>) -> Pin<Box<dyn Future<Output = SimpleResult<()>> + Send + 'static>> {
         let auth_token = self.auth_token.clone();
         let symbol = self.symbol.clone();
+        let session = self.session.clone();
         let timeframe = self.timeframe.clone();
         let range = self.range;
         let indicator = self.indicator.clone();
         Box::pin(async move {
             // scrape
-            let symbol = TradingViewSymbols::build_symbol("splits", None, "regular", &symbol);
+            let built_symbol = TradingViewSymbols::build_symbol("splits", None, &session, &symbol);
             let config = TradingViewClientConfig {
                 name: "client".to_string(),
                 auth_token: auth_token.to_string(),
-                chart_symbols: vec![symbol.to_string()],
+                chart_symbols: vec![built_symbol.to_string()],
                 quote_symbols: vec![],
                 indicators: vec![
                     indicator.to_string()
@@ -66,6 +70,18 @@ impl ScrapeOperation for IndicatorScraper {
 
             // log
             log::info!("[indicator] now = {now} candle_timestamp = {candle_timestamp} mvwap = {mvwap} vwap = {vwap} long_entry = {long_entry} short_entry = {short_entry} ema1 = {ema1} ema2 = {ema2}");
+
+            // append to file
+            let output_dir = std::env::var("OUTPUT_DIR")?;
+            let path: String = format!("{output_dir}/{0}-{1}-{2}-indicator.csv", symbol, session, timeframe);
+            let mut file = OpenOptions::new()
+                .append(true)
+                .create(true)
+                .open(&path)
+                .await?;
+            file.write_all(format!("{now},{candle_timestamp},{mvwap},{vwap},{long_entry},{short_entry},{ema1},{ema2}\n").as_bytes()).await?;
+            file.flush().await?;
+            drop(file);
 
             Ok(())
         })

@@ -131,7 +131,7 @@ impl TradingViewClient {
         
         // Wait for server hello message with timeout
         let server_hello_message = TradingViewClient::wait_for_message_with_timeout(
-            Duration::from_secs(1),
+            Duration::from_secs(5),
             buffer_arc.clone(),
             |message| message.payload.contains("javastudies")
         ).await?;
@@ -214,7 +214,7 @@ impl TradingViewClient {
                 let study_loading_message = TradingViewClient::wait_for_message_with_timeout(
                     Duration::from_secs(10), // not ideal
                     buffer_arc.clone(),
-                    |message| message.payload.contains("study_lodaing")
+                    |message| message.payload.contains("study_loading")
                 ).await?;
                 let study_loading_message = study_loading_message.parsed_message.as_study_loading().ok_or(box_err!("failed to cast"))?;
                 log::info!("study_loading_message = {study_loading_message:?}");

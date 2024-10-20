@@ -1,6 +1,8 @@
 use std::{future::Future, sync::Arc};
 use std::pin::Pin;
 
+use async_fs::OpenOptions;
+use futures_lite::AsyncWriteExt;
 use scraper::ScrapeOperation;
 use simple_error::SimpleResult;
 use async_executor::Executor;
@@ -12,6 +14,7 @@ use crate::utilities;
 pub struct CandleScraper {
     pub auth_token: String,
     pub symbol: String,
+    pub session: String,
     pub timeframe: String,
     pub range: usize,
 }
@@ -20,15 +23,16 @@ impl ScrapeOperation for CandleScraper {
     fn execute(&self, executor: Arc<Executor<'static>>) -> Pin<Box<dyn Future<Output = SimpleResult<()>> + Send + 'static>> {
         let auth_token = self.auth_token.clone();
         let symbol = self.symbol.clone();
+        let session = self.session.clone();
         let timeframe = self.timeframe.clone();
         let range = self.range;
         Box::pin(async move {
             // scrape
-            let symbol = TradingViewSymbols::build_symbol("splits", None, "regular", &symbol);
+            let built_symbol = TradingViewSymbols::build_symbol("splits", None, &session, &symbol);
             let config = TradingViewClientConfig {
                 name: "client".to_string(),
                 auth_token: auth_token.to_string(),
-                chart_symbols: vec![symbol.to_string()],
+                chart_symbols: vec![built_symbol.to_string()],
                 quote_symbols: vec![],
                 indicators: vec![],
                 timeframe: Some(timeframe.to_string()),
@@ -62,6 +66,18 @@ impl ScrapeOperation for CandleScraper {
 
             // log              
             log::info!("[candles] now = {now} candle_start = {candle_start} candle_end = {candle_end} candle_age = {candle_age}s candle_remaining = {candle_remaining}s open = {open} high = {high} low = {low} close = {close} volume = {volume}");
+
+            // append to file
+            let output_dir = std::env::var("OUTPUT_DIR")?;
+            let path: String = format!("{output_dir}/{0}-{1}-{2}-quote.csv", symbol, session, timeframe);
+            let mut file = OpenOptions::new()
+                .append(true)
+                .create(true)
+                .open(&path)
+                .await?;
+            file.write_all(format!("{now},{candle_start},{candle_end},{candle_age},{candle_remaining},{open},{high},{low},{close},{volume}\n").as_bytes()).await?;
+            file.flush().await?;
+            drop(file);
 
             Ok(())
         })

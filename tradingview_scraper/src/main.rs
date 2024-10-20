@@ -18,7 +18,7 @@ use crate::quote_scraper::QuoteScraper;
 #[macro_rules_attribute::apply(smol_macros::main!)]
 async fn main(executor: Arc<Executor<'static>>) -> SimpleResult<()> {
     // logging
-    let logging_env = env_logger::Env::default().default_filter_or("debug,websocket_client=info,rustls=info,http_client=info");
+    let logging_env = env_logger::Env::default().default_filter_or("debug,websocket_client=info,rustls=info,http_client=info,tradingview_client=info");
     env_logger::Builder::from_env(logging_env).init();
 
     // init env vars
@@ -29,6 +29,7 @@ async fn main(executor: Arc<Executor<'static>>) -> SimpleResult<()> {
     let quote_scraper = QuoteScraper {
         auth_token: std::env::var("AUTH_TOKEN")?,
         symbol: "BINANCE:BTCUSDT".to_string(),
+        session: "regular".to_string(),
     };
     let quote_handle = executor.spawn(Scraper::scrape(
         executor_clone,
@@ -41,6 +42,7 @@ async fn main(executor: Arc<Executor<'static>>) -> SimpleResult<()> {
     let candle_scraper = CandleScraper {
         auth_token: std::env::var("AUTH_TOKEN")?,
         symbol: "BINANCE:BTCUSDT".to_string(),
+        session: "regular".to_string(),
         timeframe: "5".to_string(),
         range: 1,
     };
@@ -55,6 +57,7 @@ async fn main(executor: Arc<Executor<'static>>) -> SimpleResult<()> {
     let indicator_scraper = IndicatorScraper {
         auth_token: std::env::var("AUTH_TOKEN")?,
         symbol: "BINANCE:BTCUSDT".to_string(),
+        session: "regular".to_string(),
         timeframe: "5".to_string(),
         range: 1,
         indicator: TradingViewIndicators::generate_vwap_mvwap_ema_crossover(
