@@ -4,7 +4,7 @@ use std::time::Duration;
 use simple_error::SimpleResult;
 use smol_macros::Executor;
 use tradingview_common::{TradingViewClientConfig, TradingViewClientMode, TradingViewIndicators, TradingViewSymbols};
-use tradingview_websocket_client::{DefaultTradingViewMessageProcessor, TradingViewClient, TradingViewMessageProcessor};
+use tradingview_client::{DefaultTradingViewMessageProcessor, TradingViewClient, TradingViewMessageProcessor};
 
 #[macro_rules_attribute::apply(smol_macros::main!)]
 async fn main(executor: Arc<Executor<'static>>) -> SimpleResult<()> {

@@ -1,6 +1,7 @@
 mod quote_scraper;
 mod candle_scraper;
 mod indicator_scraper;
+mod utilities;
 
 use std::sync::Arc;
 use std::time::Duration;

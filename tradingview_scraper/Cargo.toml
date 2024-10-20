@@ -14,6 +14,7 @@ env_logger = "0.11.5"
 futures-lite = "2.3.0"
 async-executor = "1.13.0"
 async-io = "2.3.4"
+async-fs = "2.1.2"
 # async macros
 smol-macros = "0.1.1"
 macro_rules_attribute = "0.2.0"
@@ -23,7 +24,7 @@ miniserde = "0.1.40"
 simple_error = { git = "https://github.com/brandonros/simple_error.git" }
 # tradingview
 tradingview_common = { path = "../tradingview_common" }
-tradingview_http_client = { path = "../tradingview_http_client" }
+tradingview_client = { path = "../tradingview_client" }
 # scraper
 scraper = { git = "https://github.com/brandonros/scraper.git" }
 # env vars

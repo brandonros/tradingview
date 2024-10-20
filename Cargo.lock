@@ -61,6 +61,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "async-channel"
+version = "2.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "89b47800b0be77592da0afd425cc03468052844aff33b84e33cc696f64e77b6a"
+dependencies = [
+ "concurrent-queue",
+ "event-listener-strategy",
+ "futures-core",
+ "pin-project-lite",
+]
+
+[[package]]
 name = "async-executor"
 version = "1.13.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -71,6 +83,17 @@ dependencies = [
  "fastrand",
  "futures-lite",
  "slab",
+]
+
+[[package]]
+name = "async-fs"
+version = "2.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ebcd09b382f40fcd159c2d695175b2ae620ffa5f3bd6f664131efff4e8b9e04a"
+dependencies = [
+ "async-lock",
+ "blocking",
+ "futures-lite",
 ]
 
 [[package]]
@@ -134,6 +157,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "atomic-waker"
+version = "1.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1505bd5d3d116872e7271a6d4e16d81d0c8570876c8de68093a09ac269d8aac0"
+
+[[package]]
 name = "autocfg"
 version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -156,6 +185,19 @@ name = "bitflags"
 version = "2.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b048fb63fd8b5923fc5aa7b340d8e156aec7ec02f0c78fa8a6ddc2613f6f71de"
+
+[[package]]
+name = "blocking"
+version = "1.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "703f41c54fc768e63e091340b424302bb1c29ef4aa0c7f10fe849dfb114d29ea"
+dependencies = [
+ "async-channel",
+ "async-task",
+ "futures-io",
+ "futures-lite",
+ "piper",
+]
 
 [[package]]
 name = "byteorder"
@@ -363,19 +405,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "http_server"
-version = "0.1.0"
-source = "git+https://github.com/brandonros/http_server.git#296ce5bd8ab53f2d974dbd1da70a2ce0c8bbaf38"
-dependencies = [
- "async-executor",
- "async-io",
- "futures-lite",
- "http",
- "log",
- "simple_error",
-]
-
-[[package]]
 name = "humantime"
 version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -488,6 +517,17 @@ name = "pin-project-lite"
 version = "0.2.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bda66fc9667c18cb2758a2ac84d1167245054bcf85d5d1aaa6923f45801bdd02"
+
+[[package]]
+name = "piper"
+version = "0.2.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "96c8c490f422ef9a4efd2cb5b42b76c8613d7e7dfc1caf667b8a3350a5acc066"
+dependencies = [
+ "atomic-waker",
+ "fastrand",
+ "futures-io",
+]
 
 [[package]]
 name = "polling"
@@ -658,7 +698,7 @@ checksum = "f3cb5ba0dc43242ce17de99c180e96db90b235b8a9fdc9543c96d2209116bd9f"
 [[package]]
 name = "scraper"
 version = "0.1.0"
-source = "git+https://github.com/brandonros/scraper.git#251ddb25ca57f7be6c75928557247543c6352b53"
+source = "git+https://github.com/brandonros/scraper.git#0832108ceab32244126093b3949fb79eedf1a92d"
 dependencies = [
  "async-executor",
  "async-io",
@@ -743,73 +783,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c06d3da6113f116aaee68e4d601191614c9053067f9ab7f6edbcb161237daa54"
 
 [[package]]
-name = "tradingview_common"
-version = "0.1.0"
-dependencies = [
- "enum-as-inner",
- "log",
- "miniserde",
- "simple_error",
-]
-
-[[package]]
-name = "tradingview_http_client"
-version = "0.1.0"
-dependencies = [
- "async-executor",
- "async-io",
- "dotenvy",
- "env_logger",
- "http",
- "http_client",
- "log",
- "macro_rules_attribute",
- "miniserde",
- "simple_error",
- "smol-macros",
- "tradingview_common",
-]
-
-[[package]]
-name = "tradingview_http_server"
-version = "0.1.0"
-dependencies = [
- "async-executor",
- "env_logger",
- "http",
- "http_server",
- "log",
- "macro_rules_attribute",
- "miniserde",
- "simple_error",
- "smol-macros",
- "tradingview_common",
- "tradingview_websocket_client",
-]
-
-[[package]]
-name = "tradingview_scraper"
-version = "0.1.0"
-dependencies = [
- "async-executor",
- "async-io",
- "dotenvy",
- "env_logger",
- "futures-lite",
- "http",
- "http_client",
- "log",
- "macro_rules_attribute",
- "miniserde",
- "scraper",
- "simple_error",
- "smol-macros",
- "tradingview_common",
- "tradingview_http_client",
-]
-
-[[package]]
-name = "tradingview_websocket_client"
+name = "tradingview_client"
 version = "0.1.0"
 dependencies = [
  "async-executor",
@@ -830,6 +804,38 @@ dependencies = [
  "smol-macros",
  "tradingview_common",
  "websocket_client",
+]
+
+[[package]]
+name = "tradingview_common"
+version = "0.1.0"
+dependencies = [
+ "enum-as-inner",
+ "log",
+ "miniserde",
+ "simple_error",
+]
+
+[[package]]
+name = "tradingview_scraper"
+version = "0.1.0"
+dependencies = [
+ "async-executor",
+ "async-fs",
+ "async-io",
+ "dotenvy",
+ "env_logger",
+ "futures-lite",
+ "http",
+ "http_client",
+ "log",
+ "macro_rules_attribute",
+ "miniserde",
+ "scraper",
+ "simple_error",
+ "smol-macros",
+ "tradingview_client",
+ "tradingview_common",
 ]
 
 [[package]]

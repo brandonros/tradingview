@@ -1,2 +1,0 @@
-# tradingview_http_server
-HTTP wrapper around tradingview_websocket_client
