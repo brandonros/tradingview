@@ -10,9 +10,6 @@ async-io = "2.3.4"
 async-lock = "3.4.0"
 async-trait = "0.1.83"
 async-executor = "1.13.1"
-# async macros
-smol-macros = "0.1.1"
-macro_rules_attribute = "0.2.0"
 # logging
 log = "0.4.20"
 # protocol codec
@@ -38,3 +35,5 @@ backtrace = "0.3.74"
 env_logger = "0.11.5"
 # env
 dotenvy = "0.15.7"
+# async runtime
+smol_base = { git = "https://github.com/brandonros/smol_base.git", rev = "9ba2a61331bd1663560a7efb9e4a743aeb28959e" }

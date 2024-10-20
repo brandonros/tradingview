@@ -810,6 +810,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "smol_base"
+version = "0.1.0"
+source = "git+https://github.com/brandonros/smol_base.git?rev=9ba2a61331bd1663560a7efb9e4a743aeb28959e#9ba2a61331bd1663560a7efb9e4a743aeb28959e"
+dependencies = [
+ "async-executor",
+ "async-io",
+ "event-listener",
+ "simple_error",
+]
+
+[[package]]
 name = "spin"
 version = "0.9.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -857,11 +868,10 @@ dependencies = [
  "futures-lite",
  "http",
  "log",
- "macro_rules_attribute",
  "miniserde",
  "nom",
  "simple_error",
- "smol-macros",
+ "smol_base",
  "tradingview_codec",
  "tradingview_common",
  "websocket_client",

@@ -1,12 +1,11 @@
 use std::sync::Arc;
 
 use simple_error::SimpleResult;
-use smol_macros::Executor;
+use async_executor::Executor;
 use tradingview_common::{TradingViewClientConfig, TradingViewClientMode};
 use tradingview_client::{DefaultTradingViewMessageProcessor, TradingViewClient, TradingViewMessageProcessor};
 
-#[macro_rules_attribute::apply(smol_macros::main!)]
-async fn main(executor: Arc<Executor<'static>>) -> SimpleResult<()> {
+async fn async_main(executor: &Arc<Executor<'static>>) -> SimpleResult<()> {
     // init logging
     env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("debug,websocket_client=info,rustls=info,http_client=info")).init();
 
@@ -33,7 +32,7 @@ async fn main(executor: Arc<Executor<'static>>) -> SimpleResult<()> {
     let client = TradingViewClient::new(config, message_processor);
 
     // spawn client
-    let scrape_result = match client.run(executor).await {
+    let scrape_result = match client.run(executor.clone()).await {
         Ok(scrape_result) => scrape_result,
         Err(err) => panic!("{err}"),
     };
@@ -42,3 +41,5 @@ async fn main(executor: Arc<Executor<'static>>) -> SimpleResult<()> {
 
     Ok(())
 }
+
+smol_base::smol_main!(async_main);
