@@ -1,5 +1,5 @@
 # tradingview
-TradingView API client and tools for use with async-std
+Async TradingView API client
 
 ## Crates used
 
