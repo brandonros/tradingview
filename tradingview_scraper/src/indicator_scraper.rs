@@ -42,6 +42,7 @@ impl ScrapeOperation for IndicatorScraper {
             let message_processor: Arc<Box<dyn TradingViewMessageProcessor + Send + Sync>> = Arc::new(Box::new(DefaultTradingViewMessageProcessor {}));
             let client = TradingViewClient::new(config, message_processor);
             let scrape_result = client.run(executor).await?;
+            drop(client);
 
             // parse response
             let study_update_message = &scrape_result.study_data_update_messages[0];

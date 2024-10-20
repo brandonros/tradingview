@@ -34,6 +34,7 @@ impl ScrapeOperation for QuoteScraper {
             let message_processor: Arc<Box<dyn TradingViewMessageProcessor + Send + Sync>> = Arc::new(Box::new(DefaultTradingViewMessageProcessor {}));
             let client = TradingViewClient::new(config, message_processor);
             let scrape_result = client.run(executor).await?;
+            drop(client);
 
             // parse response
             let quote_last_price_message = &scrape_result.quote_last_price_messages[0];

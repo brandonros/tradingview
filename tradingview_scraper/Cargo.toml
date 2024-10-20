@@ -26,6 +26,6 @@ simple_error = { git = "https://github.com/brandonros/simple_error.git" }
 tradingview_common = { path = "../tradingview_common" }
 tradingview_client = { path = "../tradingview_client" }
 # scraper
-scraper = { git = "https://github.com/brandonros/scraper.git" }
+scraper = { git = "https://github.com/brandonros/scraper.git", rev = "869193d4b0df2a2f15ee62494e53b27ca610ac87" }
 # env vars
 dotenvy = "0.15.7"

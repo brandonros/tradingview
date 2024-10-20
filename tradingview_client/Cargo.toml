@@ -29,6 +29,8 @@ miniserde = "0.1.40"
 simple_error = { git = "https://github.com/brandonros/simple_error.git" }
 # common
 tradingview_common = { path = "../tradingview_common" }
+# stack trace
+backtrace = "0.3.74"
 
 [dev-dependencies]
 # logging
