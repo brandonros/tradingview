@@ -4,12 +4,10 @@ use std::time::Duration;
 use async_executor::Executor;
 use async_lock::RwLock;
 use http::{Request, Uri, Version};
-use http_client::HttpClient;
 
 use simple_error::{box_err, SimpleResult};
 use tradingview_common::{ParsedTradingViewMessage, TradingViewClientConfig, TradingViewClientMode, TradingViewScrapeResult};
-use websocket_client::{WebSocketHelpers, WebSocketReader, WebSocketWriter};
-use futures_lite::io::{BufReader, BufWriter};
+use websocket_client::WebSocketClient;
 
 use crate::utilities;
 use crate::reader::TradingViewReader;
@@ -50,10 +48,8 @@ impl TradingViewClient {
     }
 
     pub async fn run(&self, executor: Arc<Executor<'static>>) -> SimpleResult<TradingViewScrapeResult> {
-        // Build the URI for the request
-        let uri: Uri = "wss://data.tradingview.com/socket.io/websocket?type=chart".parse()?;
-
         // Build the GET request
+        let uri: Uri = "wss://data.tradingview.com/socket.io/websocket?type=chart".parse()?;
         let request = Request::builder()
             .method("GET")
             .version(Version::HTTP_11)
@@ -61,25 +57,8 @@ impl TradingViewClient {
             .header("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36")
             .header("Host", "data.tradingview.com")
             .header("Origin", "https://www.tradingview.com")            
-            .header("Connection", "Upgrade")
-            .header("Upgrade", "websocket")      
-            .header("Sec-WebSocket-Version", "13")                        
-            .header("Sec-WebSocket-Key", WebSocketHelpers::generate_sec_websocket_key())    
             .body(vec![])?;
-
-        // Get the response
-        let mut stream = HttpClient::create_connection(&request).await?;
-        let response = HttpClient::request(&mut stream, &request).await?;
-        log::info!("response = {response:?}");
-
-        // split
-        let (reader, writer) = futures_lite::io::split(stream);
-        let reader = BufReader::new(reader);
-        let writer = BufWriter::new(writer);
-
-        // create websocket client
-        let ws_reader = WebSocketReader::new(reader);
-        let ws_writer = WebSocketWriter::new(writer);        
+        let (ws_reader, ws_writer) = WebSocketClient::open(request).await?;
 
         // Create the TradingViewClient
         let mut tv_reader = TradingViewReader::new(ws_reader);

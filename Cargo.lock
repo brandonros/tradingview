@@ -429,20 +429,6 @@ dependencies = [
 [[package]]
 name = "http_client"
 version = "0.1.0"
-source = "git+https://github.com/brandonros/http_client.git?rev=f9735f4da5b98990e9aa9d6c9dbbe0579591526e#f9735f4da5b98990e9aa9d6c9dbbe0579591526e"
-dependencies = [
- "async-io",
- "async-tls",
- "futures-lite",
- "http",
- "log",
- "miniserde",
- "simple_error",
-]
-
-[[package]]
-name = "http_client"
-version = "0.1.0"
 source = "git+https://github.com/brandonros/http_client.git#f9735f4da5b98990e9aa9d6c9dbbe0579591526e"
 dependencies = [
  "async-io",
@@ -870,7 +856,6 @@ dependencies = [
  "env_logger",
  "futures-lite",
  "http",
- "http_client 0.1.0 (git+https://github.com/brandonros/http_client.git?rev=f9735f4da5b98990e9aa9d6c9dbbe0579591526e)",
  "log",
  "macro_rules_attribute",
  "miniserde",
@@ -902,7 +887,7 @@ dependencies = [
  "env_logger",
  "futures-lite",
  "http",
- "http_client 0.1.0 (git+https://github.com/brandonros/http_client.git)",
+ "http_client",
  "log",
  "macro_rules_attribute",
  "miniserde",
@@ -959,7 +944,7 @@ dependencies = [
 [[package]]
 name = "websocket_client"
 version = "0.1.0"
-source = "git+https://github.com/brandonros/websocket_client.git#3a3f1661bfdbb7906e5f019dffb42f0516e04621"
+source = "git+https://github.com/brandonros/websocket_client.git?rev=7de0facf287a8ae78855892c2dbe804f407c37a1#7de0facf287a8ae78855892c2dbe804f407c37a1"
 dependencies = [
  "async-executor",
  "async-io",
@@ -967,6 +952,8 @@ dependencies = [
  "base64 0.22.1",
  "bytes",
  "futures-lite",
+ "http",
+ "http_client",
  "log",
  "macro_rules_attribute",
  "nom",
