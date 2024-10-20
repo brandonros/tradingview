@@ -1,0 +1,10 @@
+[package]
+name = "tradingview_codec"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# common
+tradingview_common = { path = "../tradingview_common" }
+# nom
+nom = "7.1.3"

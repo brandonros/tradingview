@@ -3,4 +3,4 @@ members = [
     "tradingview_common",
     "tradingview_scraper",
     "tradingview_client"
-]
+, "tradingview_codec"]

@@ -2,8 +2,7 @@ use simple_error::SimpleResult;
 use websocket_client::WebSocketReader;
 use bytes::{Buf, BytesMut};
 use futures_lite::io::AsyncRead;
-
-use crate::message_wrapper::TradingViewMessageWrapper;
+use tradingview_codec::TradingViewMessageWrapper;
 
 pub struct TradingViewReader<R>
 where

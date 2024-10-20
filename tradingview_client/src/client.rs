@@ -7,12 +7,12 @@ use http::{Request, Uri, Version};
 
 use simple_error::{box_err, SimpleResult};
 use tradingview_common::{ParsedTradingViewMessage, TradingViewClientConfig, TradingViewClientMode, TradingViewScrapeResult};
+use tradingview_codec::TradingViewMessageWrapper;
 use websocket_client::WebSocketClient;
 
 use crate::utilities;
 use crate::reader::TradingViewReader;
 use crate::writer::TradingViewWriter;
-use crate::message_wrapper::TradingViewMessageWrapper;
 use crate::message_processor::TradingViewMessageProcessor;
 
 pub struct TradingViewClient {

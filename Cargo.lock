@@ -862,8 +862,17 @@ dependencies = [
  "nom",
  "simple_error",
  "smol-macros",
+ "tradingview_codec",
  "tradingview_common",
  "websocket_client",
+]
+
+[[package]]
+name = "tradingview_codec"
+version = "0.1.0"
+dependencies = [
+ "nom",
+ "tradingview_common",
 ]
 
 [[package]]

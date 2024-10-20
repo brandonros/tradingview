@@ -1,7 +1,6 @@
 use nom::{
     bytes::streaming::{tag as tag_streaming, take as take_streaming},
     character::streaming::digit1 as digit1_streaming,
-
     error::ErrorKind,
     IResult,
 };
