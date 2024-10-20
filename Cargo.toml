@@ -1,0 +1,8 @@
+[workspace]
+members = [
+    "tradingview_common",
+    "tradingview_http_client",
+    "tradingview_http_server",
+    "tradingview_scraper",
+    "tradingview_websocket_client"
+]
