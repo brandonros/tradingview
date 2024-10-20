@@ -49,8 +49,8 @@ impl TradingViewClient {
             .body(vec![])?;
 
         // Get the response
-        let mut stream = HttpClient::connect(&request).await?;
-        let response = HttpClient::send(&mut stream, &request).await?;
+        let mut stream = HttpClient::create_connection(&request).await?;
+        let response = HttpClient::request(&mut stream, &request).await?;
         log::info!("response = {response:?}");
 
         // split

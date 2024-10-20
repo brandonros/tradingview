@@ -351,7 +351,7 @@ dependencies = [
 [[package]]
 name = "http_client"
 version = "0.1.0"
-source = "git+https://github.com/brandonros/http_client.git#96be5cc1688ffd1480f484e6dad3db8310390b2e"
+source = "git+https://github.com/brandonros/http_client.git#f9735f4da5b98990e9aa9d6c9dbbe0579591526e"
 dependencies = [
  "async-io",
  "async-tls",
@@ -365,7 +365,7 @@ dependencies = [
 [[package]]
 name = "http_server"
 version = "0.1.0"
-source = "git+https://github.com/brandonros/http_server.git#f000defbb13f6c0b6c0a32103cf41eb7cf8387a4"
+source = "git+https://github.com/brandonros/http_server.git#296ce5bd8ab53f2d974dbd1da70a2ce0c8bbaf38"
 dependencies = [
  "async-executor",
  "async-io",
@@ -658,7 +658,7 @@ checksum = "f3cb5ba0dc43242ce17de99c180e96db90b235b8a9fdc9543c96d2209116bd9f"
 [[package]]
 name = "scraper"
 version = "0.1.0"
-source = "git+https://github.com/brandonros/scraper.git#1357a64f450b114771c32de1f027953214892347"
+source = "git+https://github.com/brandonros/scraper.git#251ddb25ca57f7be6c75928557247543c6352b53"
 dependencies = [
  "async-executor",
  "async-io",
@@ -878,7 +878,7 @@ dependencies = [
 [[package]]
 name = "websocket_client"
 version = "0.1.0"
-source = "git+https://github.com/brandonros/websocket_client.git#ca5840557b21850e65b56b39ab105a86883705a2"
+source = "git+https://github.com/brandonros/websocket_client.git#3a3f1661bfdbb7906e5f019dffb42f0516e04621"
 dependencies = [
  "async-executor",
  "async-io",
