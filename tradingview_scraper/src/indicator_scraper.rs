@@ -66,11 +66,12 @@ impl ScrapeOperation for IndicatorScraper {
             let _senkou_a = &values[11];
             let _senkou_b = &values[12];
 
-            // log
-            log::info!("[indicator] now = {now} candle_timestamp = {candle_timestamp} mvwap = {mvwap} vwap = {vwap} long_entry = {long_entry} short_entry = {short_entry} ema1 = {ema1} ema2 = {ema2}");
+            // build line
+            let line = format!("{now},{candle_timestamp},{mvwap:.2},{vwap:.2},{long_entry},{short_entry},{ema1:.2},{ema2:.2}");
+            log::info!("[indicator] {line}");
 
             // return
-            Ok(format!("{now},{candle_timestamp},{mvwap},{vwap},{long_entry},{short_entry},{ema1},{ema2}\n"))
+            Ok(format!("{line}\n"))
         })
     }
 }

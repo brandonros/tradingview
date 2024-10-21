@@ -51,10 +51,11 @@ impl ScrapeOperation for QuoteScraper {
             let quote_age = now - lp_time;
 
             // log
-            log::info!("[quote] now = {now} lp_time = {lp_time} quote_age = {quote_age}s lp = {lp} ch = {ch} chp = {chp} volume = {volume} prev_close = {prev_close}");
+            let line = format!("{now},{lp_time},{quote_age},{lp},{ch},{chp},{volume},{prev_close}");
+            log::info!("[quote] {line}");
 
             // return
-            Ok(format!("{now},{lp_time},{quote_age},{lp},{ch},{chp},{volume},{prev_close}\n"))
+            Ok(format!("{line}\n"))
         })
     }
 }

@@ -966,7 +966,7 @@ dependencies = [
 [[package]]
 name = "websocket_client"
 version = "0.1.0"
-source = "git+https://github.com/brandonros/websocket_client.git?rev=7de0facf287a8ae78855892c2dbe804f407c37a1#7de0facf287a8ae78855892c2dbe804f407c37a1"
+source = "git+https://github.com/brandonros/websocket_client.git?rev=6fddb3a394f166abae010ffcdbfa7a264c625a49#6fddb3a394f166abae010ffcdbfa7a264c625a49"
 dependencies = [
  "async-executor 1.13.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "async-io",

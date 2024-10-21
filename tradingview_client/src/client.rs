@@ -115,7 +115,7 @@ impl TradingViewClient {
             |message| message.payload.contains("javastudies")
         ).await?;
         let server_hello_message = server_hello_message.parsed_message.as_server_hello().ok_or(box_err!("failed to cast"))?;
-        log::info!("server_hello_message = {server_hello_message:?}");
+        log::debug!("server_hello_message = {server_hello_message:?}");
         scrape_result.server_hello_messages.push(server_hello_message.clone());
 
         // set auth token
@@ -144,7 +144,7 @@ impl TradingViewClient {
                 |message| message.payload.contains("symbol_resolved")
             ).await?;
             let symbol_resolved_message = symbol_resolved_message.parsed_message.as_symbol_resolved().ok_or(box_err!("failed to cast"))?;
-            log::info!("symbol_resolved_message = {symbol_resolved_message:?}");
+            log::debug!("symbol_resolved_message = {symbol_resolved_message:?}");
             scrape_result.symbol_resolved_messages.push(symbol_resolved_message.clone());
 
             // add symbol to chart session as series
@@ -160,7 +160,7 @@ impl TradingViewClient {
                 buffer_arc.clone(),
                 |message| message.payload.contains("series_loading")
             ).await?;
-            log::info!("series_loading_message = {series_loading_message:?}");
+            log::debug!("series_loading_message = {series_loading_message:?}");
             let series_loading_message = series_loading_message.parsed_message.as_series_loading().ok_or(box_err!("failed to cast"))?;
             scrape_result.series_loading_messages.push(series_loading_message.clone());
 
@@ -170,7 +170,7 @@ impl TradingViewClient {
                 buffer_arc.clone(),
                 |message| message.payload.contains("timescale_update")
             ).await?;
-            log::info!("timescale_update_message = {timescale_update_message:?}");
+            log::debug!("timescale_update_message = {timescale_update_message:?}");
             let timescale_update_message = timescale_update_message.parsed_message.as_timescale_update().ok_or(box_err!("failed to cast"))?;
             scrape_result.timescale_update_messages.push(timescale_update_message.clone());
 
@@ -180,7 +180,7 @@ impl TradingViewClient {
                 buffer_arc.clone(),
                 |message| message.payload.contains("series_completed")
             ).await?;
-            log::info!("series_completed_message = {series_completed_message:?}");
+            log::debug!("series_completed_message = {series_completed_message:?}");
             let series_completed_message = series_completed_message.parsed_message.as_series_completed().ok_or(box_err!("failed to cast"))?;
             scrape_result.series_completed_messages.push(series_completed_message.clone());
 
@@ -196,7 +196,7 @@ impl TradingViewClient {
                     |message| message.payload.contains("study_loading")
                 ).await?;
                 let study_loading_message = study_loading_message.parsed_message.as_study_loading().ok_or(box_err!("failed to cast"))?;
-                log::info!("study_loading_message = {study_loading_message:?}");
+                log::debug!("study_loading_message = {study_loading_message:?}");
                 scrape_result.study_loading_messages.push(study_loading_message.clone());
 
                 // wait for study completed message
@@ -206,7 +206,7 @@ impl TradingViewClient {
                     |message| message.payload.contains("study_completed")
                 ).await?;
                 let study_completed_message = study_completed_message.parsed_message.as_study_completed().ok_or(box_err!("failed to cast"))?;
-                log::info!("study_completed_message = {study_completed_message:?}");
+                log::debug!("study_completed_message = {study_completed_message:?}");
                 scrape_result.study_completed_messages.push(study_completed_message.clone());
 
                 let mut index = 2;
@@ -223,7 +223,7 @@ impl TradingViewClient {
                         |message| message.payload.contains("study_loading")
                     ).await?;
                     let study_loading_message = study_loading_message.parsed_message.as_study_loading().ok_or(box_err!("failed to cast"))?;
-                    log::info!("study_loading_message = {study_loading_message:?}");
+                    log::debug!("study_loading_message = {study_loading_message:?}");
                     scrape_result.study_loading_messages.push(study_loading_message.clone());
 
                     // wait for study completed message
@@ -233,7 +233,7 @@ impl TradingViewClient {
                         |message| message.payload.contains("study_completed")
                     ).await?;
                     let study_completed_message = study_completed_message.parsed_message.as_study_completed().ok_or(box_err!("failed to cast"))?;
-                    log::info!("study_completed_message = {study_completed_message:?}");
+                    log::debug!("study_completed_message = {study_completed_message:?}");
                     scrape_result.study_completed_messages.push(study_completed_message.clone());
 
                     // wait for study data update
@@ -255,7 +255,7 @@ impl TradingViewClient {
                         }
                     ).await?;
                     let study_data_update_message = study_data_update_message.parsed_message.as_data_update().ok_or(box_err!("failed to cast"))?;
-                    log::info!("study_data_update_message = {study_data_update_message:?}");
+                    log::debug!("study_data_update_message = {study_data_update_message:?}");
                     scrape_result.study_data_update_messages.push(study_data_update_message.clone());
                 }
             }
@@ -287,7 +287,7 @@ impl TradingViewClient {
                 |message| message.payload.contains("quote_completed")
             ).await?;
             let quote_completed_message = quote_completed_message.parsed_message.as_quote_completed().ok_or(box_err!("failed to cast"))?;
-            log::info!("quote_completed_message = {quote_completed_message:?}");
+            log::debug!("quote_completed_message = {quote_completed_message:?}");
             scrape_result.quote_completed_messages.push(quote_completed_message.clone());
 
             // wait for quote last price
@@ -304,7 +304,7 @@ impl TradingViewClient {
                 }
             ).await?;
             let quote_last_price_message = quote_last_price_message.parsed_message.as_quote_series_data().ok_or(box_err!("failed to cast"))?;
-            log::info!("quote_last_price_message = {quote_last_price_message:?}");
+            log::debug!("quote_last_price_message = {quote_last_price_message:?}");
             scrape_result.quote_last_price_messages.push(quote_last_price_message.clone());
 
             // increment index
@@ -342,7 +342,7 @@ impl TradingViewClient {
                     let parsed_message = ParsedTradingViewMessage::from_string(&message.payload)?;
                     match &parsed_message {
                         ParsedTradingViewMessage::Ping(nonce) => {
-                            log::info!("ping nonce = {nonce}");
+                            log::debug!("ping nonce = {nonce}");
                             tv_writer.pong(*nonce).await?;
                         },
                         _ => {

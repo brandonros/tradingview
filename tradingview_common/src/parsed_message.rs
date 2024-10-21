@@ -179,7 +179,7 @@ impl ParsedTradingViewMessage {
         let message_type = parsed_message.get("m").ok_or(box_err!("failed to get message_type"))?;
         let message_type = json_utilities::value_to_string(message_type)?;
         if message_type == "qsd" {
-            //log::info!("qsd = {parsed_message:?}");
+            log::debug!("qsd = {parsed_message:?}");
             let p = parsed_message.get("p").ok_or(box_err!("failed to get p"))?;
             let p = json_utilities::value_to_array(p)?;
             let quote_session_id = &p[0];
@@ -223,7 +223,7 @@ impl ParsedTradingViewMessage {
                 quote_update: quote_series_data_update
             }))
         } else if message_type == "du" {
-            //log::info!("du = {parsed_message:?}");
+            log::debug!("du = {parsed_message:?}");
             let p = parsed_message.get("p").ok_or(box_err!("failed to get p"))?;
             let p = json_utilities::value_to_array(p)?;
             let chart_session_id = &p[0];
@@ -316,7 +316,7 @@ impl ParsedTradingViewMessage {
                 todo!("update_key = {update_key}");
             }
         } else if message_type == "quote_completed" {
-            //log::info!("quote_completed = {parsed_message:?}");
+            log::debug!("quote_completed = {parsed_message:?}");
             let p = parsed_message.get("p").ok_or(box_err!("failed to get p"))?;
             let p = json_utilities::value_to_array(p)?;
             let quote_session_id = &p[0];
@@ -328,7 +328,7 @@ impl ParsedTradingViewMessage {
                 symbol
             }))
         } else if message_type == "timescale_update" {
-            //log::info!("timescale_update parsed_message = {parsed_message:?}");
+            log::debug!("timescale_update parsed_message = {parsed_message:?}");
             let p = parsed_message.get("p").ok_or(box_err!("failed to get p"))?;
             let p = json_utilities::value_to_array(p)?;
             let chart_session_id = &p[0];
@@ -388,52 +388,52 @@ impl ParsedTradingViewMessage {
                 unimplemented!()
             }
         } else if message_type == "series_loading" {
-            log::info!("series_loading = {parsed_message:?}");
+            log::debug!("series_loading = {parsed_message:?}");
             Ok(ParsedTradingViewMessage::SeriesLoading(SeriesLoadingMessage {
                 
             }))
         } else if message_type == "symbol_resolved" {
-            log::info!("symbol_resolved = {parsed_message:?}");
+            log::debug!("symbol_resolved = {parsed_message:?}");
             Ok(ParsedTradingViewMessage::SymbolResolved(SymbolResolvedMessage {
                 
             }))
         } else if message_type == "series_completed" {
-            log::info!("series_completed = {parsed_message:?}");
+            log::debug!("series_completed = {parsed_message:?}");
             Ok(ParsedTradingViewMessage::SeriesCompleted(SeriesCompletedMessage {
                 
             }))
         } else if message_type == "study_loading" {
-            log::info!("study_loading = {parsed_message:?}");
+            log::debug!("study_loading = {parsed_message:?}");
             Ok(ParsedTradingViewMessage::StudyLoading(StudyLoadingMessage {
                 
             }))
         } else if message_type == "study_error" {
-            log::info!("study_error = {parsed_message:?}");
+            log::debug!("study_error = {parsed_message:?}");
             Ok(ParsedTradingViewMessage::StudyError(StudyErrorMessage {
                 
             }))
         } else if message_type == "study_completed" {
-            log::info!("study_completed = {parsed_message:?}");
+            log::debug!("study_completed = {parsed_message:?}");
             Ok(ParsedTradingViewMessage::StudyCompleted(StudyCompletedMessage {
                 
             }))
         } else if message_type == "tickmark_update" {
-            log::info!("tickmark_update = {parsed_message:?}");
+            log::debug!("tickmark_update = {parsed_message:?}");
             Ok(ParsedTradingViewMessage::TickmarkUpdate(TickmarkUpdateMessage {
                 
             }))
         } else if message_type == "critical_error" {
-            log::info!("critical_error = {parsed_message:?}");
+            log::debug!("critical_error = {parsed_message:?}");
             Ok(ParsedTradingViewMessage::CriticalError(CriticalErrorMessage {
                 
             }))
         } else if message_type == "protcol_error" {
-            log::info!("protcol_error = {parsed_message:?}");
+            log::debug!("protcol_error = {parsed_message:?}");
             Ok(ParsedTradingViewMessage::ProtocolError(ProtocolErrorMessage {
                 
             }))
         } else if message_type == "notify_user" {
-            log::info!("notify_user = {parsed_message:?}");
+            log::debug!("notify_user = {parsed_message:?}");
             Ok(ParsedTradingViewMessage::NotifyUser(NotifyUserMessage {
                 
             }))

@@ -17,7 +17,7 @@ use crate::quote_scraper::QuoteScraper;
 
 async fn async_main(executor: &Arc<Executor<'static>>) -> SimpleResult<()> {
     // logging
-    let logging_env = env_logger::Env::default().default_filter_or("debug,websocket_client=info,rustls=info,http_client=info,tradingview_client=info");
+    let logging_env = env_logger::Env::default().default_filter_or("debug,websocket_client=info,rustls=info,http_client=info,tradingview_client=info,tradingview_common=info");
     env_logger::Builder::from_env(logging_env).init();
 
     // init env vars

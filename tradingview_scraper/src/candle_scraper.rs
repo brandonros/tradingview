@@ -62,11 +62,12 @@ impl ScrapeOperation for CandleScraper {
             let close = current_candle.close;
             let volume = current_candle.volume;
 
-            // log              
-            log::info!("[candles] now = {now} candle_start = {candle_start} candle_end = {candle_end} candle_age = {candle_age}s candle_remaining = {candle_remaining}s open = {open} high = {high} low = {low} close = {close} volume = {volume}");
+            // log
+            let line = format!("{now},{candle_start},{candle_end},{candle_age},{candle_remaining},{open:.2},{high:.2},{low:.2},{close:.2},{volume:.4}");              
+            log::info!("[candle] {line}");
 
             // return
-            Ok(format!("{now},{candle_start},{candle_end},{candle_age},{candle_remaining},{open},{high},{low},{close},{volume}\n"))
+            Ok(format!("{line}\n"))
         })
     }
 }
