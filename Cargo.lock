@@ -101,6 +101,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "async-executor"
+version = "1.13.1"
+source = "git+https://github.com/brandonros/async-executor.git?rev=144d6c6bcd92ecba5ae1214df25f420d192d5248#144d6c6bcd92ecba5ae1214df25f420d192d5248"
+dependencies = [
+ "async-io",
+ "async-task",
+ "concurrent-queue",
+ "event-listener",
+ "fastrand",
+ "futures-lite",
+ "slab",
+]
+
+[[package]]
 name = "async-fs"
 version = "2.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -276,6 +290,20 @@ name = "crossbeam-utils"
 version = "0.8.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "22ec99545bb0ed0ea7bb9b8e1e9122ea386ff8a48c0922e43f36d45ab09e0e80"
+
+[[package]]
+name = "csv_scraper"
+version = "0.1.0"
+source = "git+https://github.com/brandonros/csv_scraper.git?rev=ce507695de7fe1cb264a518506dbc0df735a1717#ce507695de7fe1cb264a518506dbc0df735a1717"
+dependencies = [
+ "async-executor 1.13.1 (git+https://github.com/brandonros/async-executor.git?rev=144d6c6bcd92ecba5ae1214df25f420d192d5248)",
+ "async-fs",
+ "async-io",
+ "async-lock",
+ "futures-lite",
+ "log",
+ "simple_error",
+]
 
 [[package]]
 name = "dotenvy"
@@ -756,17 +784,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f3cb5ba0dc43242ce17de99c180e96db90b235b8a9fdc9543c96d2209116bd9f"
 
 [[package]]
-name = "scraper"
-version = "0.1.0"
-source = "git+https://github.com/brandonros/scraper.git?rev=869193d4b0df2a2f15ee62494e53b27ca610ac87#869193d4b0df2a2f15ee62494e53b27ca610ac87"
-dependencies = [
- "async-executor",
- "async-io",
- "log",
- "simple_error",
-]
-
-[[package]]
 name = "sct"
 version = "0.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -802,22 +819,11 @@ version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bfcaedb62e0475a6898988138995ec7b1e5d116167a72bb12c7b59d0649fbbc2"
 dependencies = [
- "async-executor",
+ "async-executor 1.13.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "async-io",
  "async-lock",
  "event-listener",
  "futures-lite",
-]
-
-[[package]]
-name = "smol_base"
-version = "0.1.0"
-source = "git+https://github.com/brandonros/smol_base.git?rev=9ba2a61331bd1663560a7efb9e4a743aeb28959e#9ba2a61331bd1663560a7efb9e4a743aeb28959e"
-dependencies = [
- "async-executor",
- "async-io",
- "event-listener",
- "simple_error",
 ]
 
 [[package]]
@@ -857,7 +863,7 @@ checksum = "c06d3da6113f116aaee68e4d601191614c9053067f9ab7f6edbcb161237daa54"
 name = "tradingview_client"
 version = "0.1.0"
 dependencies = [
- "async-executor",
+ "async-executor 1.13.1 (git+https://github.com/brandonros/async-executor.git?rev=144d6c6bcd92ecba5ae1214df25f420d192d5248)",
  "async-io",
  "async-lock",
  "async-trait",
@@ -871,7 +877,6 @@ dependencies = [
  "miniserde",
  "nom",
  "simple_error",
- "smol_base",
  "tradingview_codec",
  "tradingview_common",
  "websocket_client",
@@ -899,20 +904,18 @@ dependencies = [
 name = "tradingview_scraper"
 version = "0.1.0"
 dependencies = [
- "async-executor",
+ "async-executor 1.13.1 (git+https://github.com/brandonros/async-executor.git?rev=144d6c6bcd92ecba5ae1214df25f420d192d5248)",
  "async-fs",
  "async-io",
+ "csv_scraper",
  "dotenvy",
  "env_logger",
  "futures-lite",
  "http",
  "http_client",
  "log",
- "macro_rules_attribute",
  "miniserde",
- "scraper",
  "simple_error",
- "smol-macros",
  "tradingview_client",
  "tradingview_common",
 ]
@@ -965,7 +968,7 @@ name = "websocket_client"
 version = "0.1.0"
 source = "git+https://github.com/brandonros/websocket_client.git?rev=7de0facf287a8ae78855892c2dbe804f407c37a1#7de0facf287a8ae78855892c2dbe804f407c37a1"
 dependencies = [
- "async-executor",
+ "async-executor 1.13.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "async-io",
  "async-tls",
  "base64 0.22.1",

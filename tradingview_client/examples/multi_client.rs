@@ -2,7 +2,7 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use simple_error::SimpleResult;
-use async_executor::Executor;
+use async_executor::{with_thread_pool, Executor};
 use tradingview_common::{TradingViewClientConfig, TradingViewClientMode, TradingViewIndicators, TradingViewSymbols};
 use tradingview_client::{DefaultTradingViewMessageProcessor, TradingViewClient, TradingViewMessageProcessor};
 
@@ -81,4 +81,7 @@ async fn async_main(executor: &Arc<Executor<'static>>) -> SimpleResult<()> {
     }
 }
 
-smol_base::smol_main!(async_main);
+fn main() -> SimpleResult<()> {
+    let ex = Arc::new(Executor::new());
+    with_thread_pool(&ex, || async_io::block_on(async_main(&ex)))
+}

@@ -1,9 +1,7 @@
 use std::{future::Future, sync::Arc};
 use std::pin::Pin;
 
-use async_fs::OpenOptions;
-use futures_lite::AsyncWriteExt;
-use scraper::ScrapeOperation;
+use csv_scraper::ScrapeOperation;
 use simple_error::SimpleResult;
 use async_executor::Executor;
 use tradingview_common::{TradingViewClientConfig, TradingViewClientMode, TradingViewSymbols};
@@ -21,7 +19,7 @@ pub struct IndicatorScraper {
 }
 
 impl ScrapeOperation for IndicatorScraper {
-    fn execute(&self, executor: Arc<Executor<'static>>) -> Pin<Box<dyn Future<Output = SimpleResult<()>> + Send + 'static>> {
+    fn execute(&self, executor: Arc<Executor<'static>>) -> Pin<Box<dyn Future<Output = SimpleResult<String>> + Send + 'static>> {
         let auth_token = self.auth_token.clone();
         let symbol = self.symbol.clone();
         let session = self.session.clone();
@@ -71,19 +69,8 @@ impl ScrapeOperation for IndicatorScraper {
             // log
             log::info!("[indicator] now = {now} candle_timestamp = {candle_timestamp} mvwap = {mvwap} vwap = {vwap} long_entry = {long_entry} short_entry = {short_entry} ema1 = {ema1} ema2 = {ema2}");
 
-            // append to file
-            let output_dir = std::env::var("OUTPUT_DIR")?;
-            let path: String = format!("{output_dir}/{0}-{1}-{2}-indicator.csv", symbol, session, timeframe);
-            let mut file = OpenOptions::new()
-                .append(true)
-                .create(true)
-                .open(&path)
-                .await?;
-            file.write_all(format!("{now},{candle_timestamp},{mvwap},{vwap},{long_entry},{short_entry},{ema1},{ema2}\n").as_bytes()).await?;
-            file.flush().await?;
-            drop(file);
-
-            Ok(())
+            // return
+            Ok(format!("{now},{candle_timestamp},{mvwap},{vwap},{long_entry},{short_entry},{ema1},{ema2}\n"))
         })
     }
 }

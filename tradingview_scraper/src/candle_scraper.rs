@@ -1,9 +1,7 @@
 use std::{future::Future, sync::Arc};
 use std::pin::Pin;
 
-use async_fs::OpenOptions;
-use futures_lite::AsyncWriteExt;
-use scraper::ScrapeOperation;
+use csv_scraper::ScrapeOperation;
 use simple_error::SimpleResult;
 use async_executor::Executor;
 use tradingview_common::{TradingViewClientConfig, TradingViewClientMode, TradingViewSymbols};
@@ -20,7 +18,7 @@ pub struct CandleScraper {
 }
 
 impl ScrapeOperation for CandleScraper {
-    fn execute(&self, executor: Arc<Executor<'static>>) -> Pin<Box<dyn Future<Output = SimpleResult<()>> + Send + 'static>> {
+    fn execute(&self, executor: Arc<Executor<'static>>) -> Pin<Box<dyn Future<Output = SimpleResult<String>> + Send + 'static>> {
         let auth_token = self.auth_token.clone();
         let symbol = self.symbol.clone();
         let session = self.session.clone();
@@ -67,19 +65,8 @@ impl ScrapeOperation for CandleScraper {
             // log              
             log::info!("[candles] now = {now} candle_start = {candle_start} candle_end = {candle_end} candle_age = {candle_age}s candle_remaining = {candle_remaining}s open = {open} high = {high} low = {low} close = {close} volume = {volume}");
 
-            // append to file
-            let output_dir = std::env::var("OUTPUT_DIR")?;
-            let path: String = format!("{output_dir}/{0}-{1}-{2}-quote.csv", symbol, session, timeframe);
-            let mut file = OpenOptions::new()
-                .append(true)
-                .create(true)
-                .open(&path)
-                .await?;
-            file.write_all(format!("{now},{candle_start},{candle_end},{candle_age},{candle_remaining},{open},{high},{low},{close},{volume}\n").as_bytes()).await?;
-            file.flush().await?;
-            drop(file);
-
-            Ok(())
+            // return
+            Ok(format!("{now},{candle_start},{candle_end},{candle_age},{candle_remaining},{open},{high},{low},{close},{volume}\n"))
         })
     }
 }
