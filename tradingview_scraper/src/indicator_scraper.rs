@@ -4,7 +4,7 @@ use std::pin::Pin;
 use csv_scraper::ScrapeOperation;
 use simple_error::SimpleResult;
 use async_executor::Executor;
-use tradingview_common::{TradingViewClientConfig, TradingViewClientMode, TradingViewSymbols};
+use tradingview_common::{TradingViewClientConfig, TradingViewSymbols};
 use tradingview_client::{DefaultTradingViewMessageProcessor, TradingViewClient, TradingViewMessageProcessor};
 
 use crate::utilities;
@@ -39,11 +39,10 @@ impl ScrapeOperation for IndicatorScraper {
                 ],
                 timeframe: Some(timeframe.to_string()),
                 range: Some(range),
-                mode: TradingViewClientMode::Standard
             };
             let message_processor: Arc<Box<dyn TradingViewMessageProcessor + Send + Sync>> = Arc::new(Box::new(DefaultTradingViewMessageProcessor {}));
             let client = TradingViewClient::new(config, message_processor);
-            let scrape_result = client.run(executor).await?;
+            let scrape_result = client.scrape(executor).await?;
             drop(client);
 
             // parse response
