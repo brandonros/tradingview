@@ -47,10 +47,10 @@ impl ScrapeOperation for QuoteScraper {
             let chp = quote_update.chp.as_ref().ok_or(box_err!("no chp"))?;
             let prev_close = lp - ch;
             let now = utilities::now()?;
-            let quote_age = now - lp_time;
+            let quote_age = (now as i64) - (*lp_time as i64);
 
             // log
-            let line = format!("{now},{lp_time},{quote_age},{lp},{ch},{chp},{volume},{prev_close}");
+            let line = format!("{now},{lp_time},{quote_age},{lp:.2},{ch:.2},{chp:.2},{volume:.4},{prev_close:.2}");
             log::info!("[quote] {line}");
 
             // return

@@ -6,9 +6,10 @@ mod utilities;
 use std::sync::Arc;
 use std::time::Duration;
 
-use async_executor::{with_thread_pool, Executor};
+use async_executor::Executor;
 use csv_scraper::CsvScraper;
 use simple_error::SimpleResult;
+use smol_base::smol_main;
 use tradingview_common::TradingViewIndicators;
 
 use crate::candle_scraper::CandleScraper;
@@ -82,7 +83,4 @@ async fn async_main(executor: &Arc<Executor<'static>>) -> SimpleResult<()> {
     Ok(())
 }
 
-fn main() -> SimpleResult<()> {
-    let ex = Arc::new(Executor::new());
-    with_thread_pool(&ex, || async_io::block_on(async_main(&ex)))
-}
+smol_main!(async_main);

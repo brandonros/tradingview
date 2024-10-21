@@ -15,6 +15,7 @@ futures-lite = "2.3.0"
 async-executor = { git = "https://github.com/brandonros/async-executor.git", rev = "144d6c6bcd92ecba5ae1214df25f420d192d5248", features = ["main_executor"] }
 async-io = "2.3.4"
 async-fs = "2.1.2"
+smol_base = { git = "https://github.com/brandonros/smol_base.git", rev = "f2425a63a2d8d10422cd0fa5a1bf7eaa953216dc" }
 # json
 miniserde = "0.1.40"
 # errors

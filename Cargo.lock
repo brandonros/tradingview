@@ -809,6 +809,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "smol_base"
+version = "0.1.0"
+source = "git+https://github.com/brandonros/smol_base.git?rev=f2425a63a2d8d10422cd0fa5a1bf7eaa953216dc#f2425a63a2d8d10422cd0fa5a1bf7eaa953216dc"
+dependencies = [
+ "async-executor 1.13.1 (git+https://github.com/brandonros/async-executor.git?rev=144d6c6bcd92ecba5ae1214df25f420d192d5248)",
+ "async-io",
+ "event-listener",
+ "simple_error",
+]
+
+[[package]]
 name = "spin"
 version = "0.9.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -897,6 +908,7 @@ dependencies = [
  "log",
  "miniserde",
  "simple_error",
+ "smol_base",
  "tradingview_client",
  "tradingview_common",
 ]
