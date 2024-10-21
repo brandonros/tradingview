@@ -2,6 +2,7 @@ use std::{sync::Arc, time::Duration};
 
 use async_io::Timer;
 use async_lock::RwLock;
+use simple_error::{box_err, SimpleResult};
 
 pub async fn run_with_timeout<F, T>(timeout: Duration, future: F) -> Option<T>
 where
@@ -37,4 +38,24 @@ where
             Timer::after(Duration::from_millis(1)).await;
         }
     }
+}
+
+pub async fn wait_for_message_with_timeout<F, T>(
+    duration: Duration,
+    buffer: Arc<RwLock<Vec<T>>>,
+    predicate: F,
+) -> SimpleResult<T>
+where
+    F: Fn(&T) -> bool + Send + 'static,
+{
+    run_with_timeout(
+        duration,
+        Box::pin(wait_for_message(buffer, predicate)),
+    )
+    .await
+    .ok_or_else(|| {
+        let bt = backtrace::Backtrace::new();
+        box_err!(format!("timed out\n{bt:?}"))
+    })?
+    .ok_or_else(|| box_err!("failed to get expected message"))
 }

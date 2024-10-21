@@ -24,13 +24,16 @@ async fn async_main(executor: &Arc<Executor<'static>>) -> SimpleResult<()> {
     dotenvy::from_filename("./.env")?;
     let auth_token = std::env::var("AUTH_TOKEN")?;
     let output_dir = std::env::var("OUTPUT_DIR")?;
+    let symbol = std::env::var("SYMBOL")?;
+    let session = std::env::var("SESSION")?;
+    let timeframe = std::env::var("TIMEFRAME")?;
 
     // quote
     let executor_clone = executor.clone();
     let quote_scraper = QuoteScraper {
         auth_token: auth_token.clone(),
-        symbol: "BINANCE:BTCUSDT".to_string(),
-        session: "regular".to_string(),
+        symbol: symbol.clone(),
+        session: session.clone(),
     };
     let path = format!("{output_dir}/{0}-{1}-quote.csv", quote_scraper.symbol, quote_scraper.session);
     let quote_csv_scraper = CsvScraper::new(&path, quote_scraper).await?;
@@ -40,9 +43,9 @@ async fn async_main(executor: &Arc<Executor<'static>>) -> SimpleResult<()> {
     let executor_clone = executor.clone();
     let candle_scraper = CandleScraper {
         auth_token: auth_token.clone(),
-        symbol: "BINANCE:BTCUSDT".to_string(),
-        session: "regular".to_string(),
-        timeframe: "5".to_string(),
+        symbol: symbol.clone(),
+        session: session.clone(),
+        timeframe: timeframe.clone(),
         range: 1,
     };
     let path = format!("{output_dir}/{0}-{1}-{2}-candle.csv", candle_scraper.symbol, candle_scraper.session, candle_scraper.timeframe);
@@ -53,9 +56,9 @@ async fn async_main(executor: &Arc<Executor<'static>>) -> SimpleResult<()> {
     let executor_clone = executor.clone();
     let indicator_scraper = IndicatorScraper {
         auth_token: auth_token.clone(),
-        symbol: "BINANCE:BTCUSDT".to_string(),
-        session: "regular".to_string(),
-        timeframe: "5".to_string(),
+        symbol: symbol.clone(),
+        session: session.clone(),
+        timeframe: timeframe.clone(),
         range: 1,
         indicator: TradingViewIndicators::generate_vwap_mvwap_ema_crossover(
             1,

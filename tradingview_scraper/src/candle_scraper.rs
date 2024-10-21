@@ -54,7 +54,7 @@ impl ScrapeOperation for CandleScraper {
             let candle_end = candle_start + timeframe_secs - 1;
             let now = utilities::now()?;
             let candle_age = now - candle_start;
-            let candle_remaining = candle_end - now;
+            let candle_remaining = (candle_end as i64) - (now as i64); // watch out for underflow?
             let open = current_candle.open;
             let high = current_candle.high;
             let low = current_candle.low;
