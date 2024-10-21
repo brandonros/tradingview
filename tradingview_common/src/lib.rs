@@ -1,5 +1,6 @@
 mod client_config;
 mod scrape_result;
+mod message_parsing;
 mod parsed_message;
 mod json_utilities;
 mod indicators;

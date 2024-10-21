@@ -1,6 +1,6 @@
 use miniserde::{Deserialize, Serialize};
 
-use crate::parsed_message::{
+use crate::message_parsing::{
     ServerHelloMessage,
     QuoteSeriesDataMessage,
     DataUpdateMessage,
