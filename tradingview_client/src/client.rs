@@ -3,6 +3,7 @@ use std::time::Duration;
 
 use async_executor::Executor;
 use async_lock::RwLock;
+use futures_lite::AsyncWrite;
 use http::{Request, Uri, Version};
 
 use simple_error::SimpleResult;
@@ -44,71 +45,64 @@ impl TradingViewClient {
         }
     }
 
-    pub async fn run(&self, executor: Arc<Executor<'static>>) -> SimpleResult<TradingViewScrapeResult> {
-        // Build the GET request
-        let uri: Uri = "wss://data.tradingview.com/socket.io/websocket?type=chart".parse()?;
-        let request = Request::builder()
-            .method("GET")
-            .version(Version::HTTP_11)
-            .uri(uri)
-            .header("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36")
-            .header("Host", "data.tradingview.com")
-            .header("Origin", "https://www.tradingview.com")            
-            .body(vec![])?;
-        let (ws_reader, ws_writer) = WebSocketClient::open(request).await?;
+    async fn handle_quote_symbols<W: AsyncWrite + Unpin>(
+        &self, 
+        tv_writer: &mut TradingViewWriter<W>, 
+        buffer_arc: &Arc<RwLock<Vec<TradingViewMessageWrapper>>>, 
+        scrape_result: &mut TradingViewScrapeResult
+    ) -> SimpleResult<()> {
+        let mut index = 1;
+        for quote_symbol in &self.config.quote_symbols {
+            // create quote session
+            let quote_session_id = format!("qs_{index:012}");
+            tv_writer.quote_create_session(&quote_session_id).await?;
 
-        // Create the TradingViewClient
-        let mut tv_reader = TradingViewReader::new(ws_reader);
-        let mut tv_writer = TradingViewWriter::new(ws_writer);
+            // set quote session fields
+            tv_writer.quote_set_fields(&quote_session_id).await?;
 
-        // prepare buffer + references
-        let buffer: Vec<TradingViewMessageWrapper> = Vec::new();
-        let buffer = RwLock::new(buffer);
-        let buffer_arc = Arc::new(buffer);
-        let reader_handle_buffer_ref = buffer_arc.clone();
+            // add symbol to quote session
+            tv_writer.quote_add_symbols(&quote_session_id, &quote_symbol).await?;
 
-        // scrape result
-        let mut scrape_result = TradingViewScrapeResult::new();
+            // turn on quote fast symbols for quote session
+            tv_writer.quote_fast_symbols(&quote_session_id, &quote_symbol).await?;
 
-        // Spawn the reader task
-        let _reader_handle = executor.spawn(async move {
-            loop {
-                match tv_reader.read_message().await {
-                    Ok(result) => {
-                        match result {
-                            Some(message) => {
-                                // add message to buffer
-                                let mut write_lock = reader_handle_buffer_ref.write().await;
-                                write_lock.push(message);
-                                drop(write_lock);
-                            },
-                            None => {
-                                log::warn!("received none");
-                                break;
-                            }
-                        }
-                    },
-                    Err(err) => panic!("{err:?}"),
+            // wait for quote completed message
+            let quote_completed_message: QuoteCompletedMessage = client_utilities::wait_for_typed_message_with_timeout(
+                Duration::from_secs(2),
+                buffer_arc.clone(),
+                |message| message.payload.contains("quote_completed")
+            ).await?;
+            log::debug!("quote_completed_message = {quote_completed_message:?}");
+            scrape_result.quote_completed_messages.push(quote_completed_message.clone());
+
+            // wait for quote last price
+            let quote_last_price_message: QuoteSeriesDataMessage = client_utilities::wait_for_typed_message_with_timeout(
+                Duration::from_secs(2),
+                buffer_arc.clone(),
+                |message| {
+                    match &message.parsed_message {
+                        ParsedTradingViewMessage::QuoteSeriesData(quote_series_data_message) => {
+                            quote_series_data_message.quote_update.rtc.is_some() || quote_series_data_message.quote_update.lp.is_some()
+                        },
+                        _ => false
+                    }
                 }
-            }
-        });
-        
-        // Wait for server hello message with timeout
-        let server_hello_message: ServerHelloMessage = client_utilities::wait_for_typed_message_with_timeout(
-            Duration::from_secs(5),
-            buffer_arc.clone(),
-            |message| message.payload.contains("javastudies")
-        ).await?;
-        log::debug!("server_hello_message = {server_hello_message:?}");
-        scrape_result.server_hello_messages.push(server_hello_message.clone());
+            ).await?;
+            log::debug!("quote_last_price_message = {quote_last_price_message:?}");
+            scrape_result.quote_last_price_messages.push(quote_last_price_message.clone());
 
-        // set auth token
-        tv_writer.set_auth_token(&self.config.auth_token).await?;
-        
-        // set locale
-        tv_writer.set_locale("en", "US").await?;
+            // increment index
+            index += 1;
+        }
+        Ok(())
+    }
 
-        // handle chart sessions
+    async fn handle_chart_symbols<W: AsyncWrite + Unpin>(
+        &self, 
+        tv_writer: &mut TradingViewWriter<W>, 
+        buffer_arc: &Arc<RwLock<Vec<TradingViewMessageWrapper>>>, 
+        scrape_result: &mut TradingViewScrapeResult
+    ) -> SimpleResult<()> {
         let mut index = 1;
         for chart_symbol in &self.config.chart_symbols {
             // create chart session
@@ -238,51 +232,78 @@ impl TradingViewClient {
             // increment index
             index += 1;
         }
+        Ok(())
+    }
 
-        // quote_symbol quote session
-        let mut index = 1;
-        for quote_symbol in &self.config.quote_symbols {
-            // create quote session
-            let quote_session_id = format!("qs_{index:012}");
-            tv_writer.quote_create_session(&quote_session_id).await?;
+    pub async fn run(&self, executor: Arc<Executor<'static>>) -> SimpleResult<TradingViewScrapeResult> {
+        // Build the GET request
+        let uri: Uri = "wss://data.tradingview.com/socket.io/websocket?type=chart".parse()?;
+        let request = Request::builder()
+            .method("GET")
+            .version(Version::HTTP_11)
+            .uri(uri)
+            .header("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36")
+            .header("Host", "data.tradingview.com")
+            .header("Origin", "https://www.tradingview.com")            
+            .body(vec![])?;
+        let (ws_reader, ws_writer) = WebSocketClient::open(request).await?;
 
-            // set quote session fields
-            tv_writer.quote_set_fields(&quote_session_id).await?;
+        // Create the TradingViewClient
+        let mut tv_reader = TradingViewReader::new(ws_reader);
+        let mut tv_writer = TradingViewWriter::new(ws_writer);
 
-            // add symbol to quote session
-            tv_writer.quote_add_symbols(&quote_session_id, &quote_symbol).await?;
+        // prepare buffer + references
+        let buffer: Vec<TradingViewMessageWrapper> = Vec::new();
+        let buffer = RwLock::new(buffer);
+        let buffer_arc = Arc::new(buffer);
+        let reader_handle_buffer_ref = buffer_arc.clone();
 
-            // turn on quote fast symbols for quote session
-            tv_writer.quote_fast_symbols(&quote_session_id, &quote_symbol).await?;
+        // scrape result
+        let mut scrape_result = TradingViewScrapeResult::new();
 
-            // wait for quote completed message
-            let quote_completed_message: QuoteCompletedMessage = client_utilities::wait_for_typed_message_with_timeout(
-                Duration::from_secs(2),
-                buffer_arc.clone(),
-                |message| message.payload.contains("quote_completed")
-            ).await?;
-            log::debug!("quote_completed_message = {quote_completed_message:?}");
-            scrape_result.quote_completed_messages.push(quote_completed_message.clone());
-
-            // wait for quote last price
-            let quote_last_price_message: QuoteSeriesDataMessage = client_utilities::wait_for_typed_message_with_timeout(
-                Duration::from_secs(2),
-                buffer_arc.clone(),
-                |message| {
-                    match &message.parsed_message {
-                        ParsedTradingViewMessage::QuoteSeriesData(quote_series_data_message) => {
-                            quote_series_data_message.quote_update.rtc.is_some() || quote_series_data_message.quote_update.lp.is_some()
-                        },
-                        _ => false
-                    }
+        // Spawn the reader task
+        let _reader_handle = executor.spawn(async move {
+            loop {
+                match tv_reader.read_message().await {
+                    Ok(result) => {
+                        match result {
+                            Some(message) => {
+                                // add message to buffer
+                                let mut write_lock = reader_handle_buffer_ref.write().await;
+                                write_lock.push(message);
+                                drop(write_lock);
+                            },
+                            None => {
+                                log::warn!("received none");
+                                break;
+                            }
+                        }
+                    },
+                    Err(err) => panic!("{err:?}"),
                 }
-            ).await?;
-            log::debug!("quote_last_price_message = {quote_last_price_message:?}");
-            scrape_result.quote_last_price_messages.push(quote_last_price_message.clone());
+            }
+        });
+        
+        // Wait for server hello message with timeout
+        let server_hello_message: ServerHelloMessage = client_utilities::wait_for_typed_message_with_timeout(
+            Duration::from_secs(5),
+            buffer_arc.clone(),
+            |message| message.payload.contains("javastudies")
+        ).await?;
+        log::debug!("server_hello_message = {server_hello_message:?}");
+        scrape_result.server_hello_messages.push(server_hello_message.clone());
 
-            // increment index
-            index += 1;
-        }
+        // set auth token
+        tv_writer.set_auth_token(&self.config.auth_token).await?;
+        
+        // set locale
+        tv_writer.set_locale("en", "US").await?;
+
+        // handle chart symbols
+        self.handle_chart_symbols(&mut tv_writer, &buffer_arc, &mut scrape_result).await?;
+
+        // handle quote symbols
+        self.handle_quote_symbols(&mut tv_writer, &buffer_arc, &mut scrape_result).await?;
 
         // request more data from series?
         /*for _ in 0..20 {
