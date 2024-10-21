@@ -46,9 +46,11 @@ impl ScrapeOperation for CandleScraper {
             let updates = timescale_update_message.updates.as_ref().unwrap();
             let current_candle = &updates[updates.len() - 1];
             let candle_start = current_candle.timestamp;
-            let timeframe_secs = if timeframe == "5" {
+            let timeframe_secs = if timeframe == "1" {
+                60 // 1 minute
+            } else if timeframe == "5" {
                 300 // 5 minutes
-            } else {
+            }else {
                 unimplemented!()
             };
             let candle_end = candle_start + timeframe_secs - 1;
