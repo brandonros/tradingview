@@ -3,7 +3,7 @@ use std::time::Duration;
 
 use simple_error::SimpleResult;
 use async_executor::{with_thread_pool, Executor};
-use tradingview_common::{TradingViewClientConfig, TradingViewClientMode, TradingViewIndicators, TradingViewSymbols};
+use tradingview_common::{TradingViewClientConfig, TradingViewIndicators, TradingViewSymbols};
 use tradingview_client::{DefaultTradingViewMessageProcessor, TradingViewClient, TradingViewMessageProcessor};
 
 async fn async_main(executor: &Arc<Executor<'static>>) -> SimpleResult<()> {
@@ -40,7 +40,6 @@ async fn async_main(executor: &Arc<Executor<'static>>) -> SimpleResult<()> {
             ],
             timeframe: Some("5".to_string()),
             range: Some(300),
-            mode: TradingViewClientMode::Streaming
         }, message_processor1),
 
         TradingViewClient::new(TradingViewClientConfig {
@@ -53,7 +52,6 @@ async fn async_main(executor: &Arc<Executor<'static>>) -> SimpleResult<()> {
             ],
             timeframe: Some("5".to_string()),
             range: Some(300),
-            mode: TradingViewClientMode::Streaming
         }, message_processor2),
     ];
 
@@ -62,7 +60,7 @@ async fn async_main(executor: &Arc<Executor<'static>>) -> SimpleResult<()> {
     for client in clients {
         let executor_clone = executor.clone();
         let handle = executor.spawn(async move {
-            match client.run(executor_clone).await {
+            match client.subscribe(executor_clone).await {
                 Ok(_) => (),
                 Err(err) => panic!("{err}"),
             }

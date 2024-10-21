@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use simple_error::SimpleResult;
 use async_executor::{with_thread_pool, Executor};
-use tradingview_common::{TradingViewClientConfig, TradingViewClientMode};
+use tradingview_common::TradingViewClientConfig;
 use tradingview_client::{DefaultTradingViewMessageProcessor, TradingViewClient, TradingViewMessageProcessor};
 
 async fn async_main(executor: &Arc<Executor<'static>>) -> SimpleResult<()> {
@@ -27,12 +27,11 @@ async fn async_main(executor: &Arc<Executor<'static>>) -> SimpleResult<()> {
         indicators: vec![],
         timeframe: None,
         range: None,
-        mode: TradingViewClientMode::Standard
     };
     let client = TradingViewClient::new(config, message_processor);
 
     // spawn client
-    let scrape_result = match client.run(executor.clone()).await {
+    let scrape_result = match client.scrape(executor.clone()).await {
         Ok(scrape_result) => scrape_result,
         Err(err) => panic!("{err}"),
     };

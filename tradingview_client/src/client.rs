@@ -3,6 +3,7 @@ use std::time::Duration;
 
 use async_executor::Executor;
 use async_lock::RwLock;
+use futures_lite::AsyncRead;
 use futures_lite::AsyncWrite;
 use http::{Request, Uri, Version};
 
@@ -22,7 +23,6 @@ use tradingview_common::{
     SymbolResolvedMessage, 
     TimescaleUpdatedMessage, 
     TradingViewClientConfig, 
-    TradingViewClientMode, 
     TradingViewScrapeResult
 };
 
@@ -235,7 +235,7 @@ impl TradingViewClient {
         Ok(())
     }
 
-    pub async fn run(&self, executor: Arc<Executor<'static>>) -> SimpleResult<TradingViewScrapeResult> {
+    pub async fn connect(&self) -> SimpleResult<(TradingViewReader<impl AsyncRead>, TradingViewWriter<impl AsyncWrite>)> {
         // Build the GET request
         let uri: Uri = "wss://data.tradingview.com/socket.io/websocket?type=chart".parse()?;
         let request = Request::builder()
@@ -249,19 +249,24 @@ impl TradingViewClient {
         let (ws_reader, ws_writer) = WebSocketClient::open(request).await?;
 
         // Create the TradingViewClient
-        let mut tv_reader = TradingViewReader::new(ws_reader);
-        let mut tv_writer = TradingViewWriter::new(ws_writer);
+        let tv_reader = TradingViewReader::new(ws_reader);
+        let tv_writer = TradingViewWriter::new(ws_writer);
 
-        // prepare buffer + references
+        Ok((tv_reader, tv_writer))
+    }
+
+    pub async fn scrape(&self, executor: Arc<Executor<'static>>) -> SimpleResult<TradingViewScrapeResult> {
+        // connect
+        let (mut tv_reader, mut tv_writer) = self.connect().await?;
+
+        // prepare buffer + references + scrape result
         let buffer: Vec<TradingViewMessageWrapper> = Vec::new();
         let buffer = RwLock::new(buffer);
         let buffer_arc = Arc::new(buffer);
-        let reader_handle_buffer_ref = buffer_arc.clone();
-
-        // scrape result
         let mut scrape_result = TradingViewScrapeResult::new();
 
         // Spawn the reader task
+        let reader_handle_buffer_ref = buffer_arc.clone();
         let _reader_handle = executor.spawn(async move {
             loop {
                 match tv_reader.read_message().await {
@@ -314,19 +319,78 @@ impl TradingViewClient {
             async_io::Timer::after(Duration::from_secs(1)).await;
         }*/
 
-        // exit if simple
-        match self.config.mode {
-            TradingViewClientMode::Standard => {
-                // TODO: make sure buffer is empty (no missed message extraction)
+        // TODO: make sure buffer is empty (no missed message extraction)
 
-                // close socket?
-                tv_writer.close().await?;
+        // close socket?
+        tv_writer.close().await?;
 
-                // return
-                return Ok(scrape_result);
-            },
-            _ => ()
-        }
+        // return
+        return Ok(scrape_result);
+    }
+
+    pub async fn subscribe(&self, executor: Arc<Executor<'static>>) -> SimpleResult<TradingViewScrapeResult> {
+        // connect
+        let (mut tv_reader, mut tv_writer) = self.connect().await?;
+
+        // prepare buffer + references + scrape result
+        let buffer: Vec<TradingViewMessageWrapper> = Vec::new();
+        let buffer = RwLock::new(buffer);
+        let buffer_arc = Arc::new(buffer);
+        let mut scrape_result = TradingViewScrapeResult::new();
+
+        // Spawn the reader task
+        let reader_handle_buffer_ref = buffer_arc.clone();
+        let _reader_handle = executor.spawn(async move {
+            loop {
+                match tv_reader.read_message().await {
+                    Ok(result) => {
+                        match result {
+                            Some(message) => {
+                                // add message to buffer
+                                let mut write_lock = reader_handle_buffer_ref.write().await;
+                                write_lock.push(message);
+                                drop(write_lock);
+                            },
+                            None => {
+                                log::warn!("received none");
+                                break;
+                            }
+                        }
+                    },
+                    Err(err) => panic!("{err:?}"),
+                }
+            }
+        });
+        
+        // Wait for server hello message with timeout
+        let server_hello_message: ServerHelloMessage = client_utilities::wait_for_typed_message_with_timeout(
+            Duration::from_secs(5),
+            buffer_arc.clone(),
+            |message| message.payload.contains("javastudies")
+        ).await?;
+        log::debug!("server_hello_message = {server_hello_message:?}");
+        scrape_result.server_hello_messages.push(server_hello_message.clone());
+
+        // set auth token
+        tv_writer.set_auth_token(&self.config.auth_token).await?;
+        
+        // set locale
+        tv_writer.set_locale("en", "US").await?;
+
+        // handle chart symbols
+        self.handle_chart_symbols(&mut tv_writer, &buffer_arc, &mut scrape_result).await?;
+
+        // handle quote symbols
+        self.handle_quote_symbols(&mut tv_writer, &buffer_arc, &mut scrape_result).await?;
+
+        // request more data from series?
+        /*for _ in 0..20 {
+            tv_writer.request_more_data(chart_session_id1, series_id, 1000).await?;
+
+            // TODO: wait for individual sries_loading / study_loading / study_completed messages
+
+            async_io::Timer::after(Duration::from_secs(1)).await;
+        }*/
 
         // read all messages
         loop {
