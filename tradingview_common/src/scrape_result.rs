@@ -1,17 +1,15 @@
 use miniserde::{Deserialize, Serialize};
 
-use crate::message_parsing::{
-    ServerHelloMessage,
-    QuoteSeriesDataMessage,
-    DataUpdateMessage,
-    QuoteCompletedMessage,
-    TimescaleUpdatedMessage,
-    SeriesLoadingMessage,
-    SymbolResolvedMessage,
-    SeriesCompletedMessage,
-    StudyLoadingMessage,
-    StudyCompletedMessage,
-};
+use crate::message_parsing::server_hello_message::ServerHelloMessage;
+use crate::message_parsing::quote_series_data_message::QuoteSeriesDataMessage;
+use crate::message_parsing::data_update_message::DataUpdateMessage;
+use crate::message_parsing::quote_completed_message::QuoteCompletedMessage;
+use crate::message_parsing::timescale_updated_message::TimescaleUpdatedMessage;
+use crate::message_parsing::series_loading_message::SeriesLoadingMessage;
+use crate::message_parsing::symbol_resolved_message::SymbolResolvedMessage;
+use crate::message_parsing::series_completed_message::SeriesCompletedMessage;
+use crate::message_parsing::study_loading_message::StudyLoadingMessage;
+use crate::message_parsing::study_completed_message::StudyCompletedMessage;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TradingViewScrapeResult {
