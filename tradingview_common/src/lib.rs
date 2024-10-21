@@ -11,4 +11,5 @@ pub use scrape_result::*;
 pub use indicators::*;
 pub use symbols::*;
 pub use parsed_message::*;
+pub use message_parsing::*;
 

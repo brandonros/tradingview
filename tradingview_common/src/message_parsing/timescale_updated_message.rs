@@ -1,7 +1,9 @@
+use std::error::Error;
+
 use miniserde::{json::Object, Deserialize, Serialize};
 use simple_error::{box_err, SimpleResult};
 
-use crate::json_utilities;
+use crate::{json_utilities, ParsedTradingViewMessage};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TimescaleUpdate {
@@ -81,6 +83,17 @@ impl TimescaleUpdatedMessage {
             })
         } else {
             unimplemented!()
+        }
+    }
+}
+
+impl TryFrom<ParsedTradingViewMessage> for TimescaleUpdatedMessage {
+    type Error = Box<dyn Error>;
+
+    fn try_from(value: ParsedTradingViewMessage) -> Result<Self, Self::Error> {
+        match value {
+            ParsedTradingViewMessage::TimescaleUpdate(msg) => Ok(msg),
+            _ => Err(box_err!("failed to cast")),
         }
     }
 }

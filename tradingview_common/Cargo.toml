@@ -6,8 +6,6 @@ edition = "2021"
 [dependencies]
 # json
 miniserde = "0.1.40"
-# enum
-enum-as-inner = "0.6.1"
 # error handling
 simple_error = { git = "https://github.com/brandonros/simple_error.git" }
 # logging

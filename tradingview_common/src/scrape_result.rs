@@ -25,3 +25,21 @@ pub struct TradingViewScrapeResult {
     pub series_data_update_messages: Vec<DataUpdateMessage>, // TODO: split series and study?    
     pub study_data_update_messages: Vec<DataUpdateMessage>, // TODO: split series and study?
 }
+
+impl TradingViewScrapeResult {
+    pub fn new() -> Self {
+        TradingViewScrapeResult {
+            server_hello_messages: vec![],
+            symbol_resolved_messages: vec![],
+            series_loading_messages: vec![],
+            timescale_update_messages: vec![],
+            series_completed_messages: vec![],
+            study_loading_messages: vec![],
+            study_completed_messages: vec![],
+            quote_completed_messages: vec![],
+            quote_last_price_messages: vec![],
+            study_data_update_messages: vec![],
+            series_data_update_messages: vec![],
+        }
+    }
+}

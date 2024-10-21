@@ -1,7 +1,8 @@
 mod reader;
 mod writer;
-mod client;
 mod utilities;
+mod client;
+mod client_utilities;
 mod message_processor;
 mod default_message_processor;
 

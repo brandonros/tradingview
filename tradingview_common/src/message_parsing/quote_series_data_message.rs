@@ -1,7 +1,9 @@
+use std::error::Error;
+
 use miniserde::{json::Object, Deserialize, Serialize};
 use simple_error::{box_err, SimpleResult};
 
-use crate::json_utilities;
+use crate::{json_utilities, ParsedTradingViewMessage};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct QuoteSeriesDataUpdate {
@@ -73,5 +75,16 @@ impl QuoteSeriesDataMessage {
             quote_session_id,
             quote_update: quote_series_data_update
         })
+    }
+}
+
+impl TryFrom<ParsedTradingViewMessage> for QuoteSeriesDataMessage {
+    type Error = Box<dyn Error>;
+
+    fn try_from(value: ParsedTradingViewMessage) -> Result<Self, Self::Error> {
+        match value {
+            ParsedTradingViewMessage::QuoteSeriesData(msg) => Ok(msg),
+            _ => Err(box_err!("failed to cast")),
+        }
     }
 }

@@ -1,4 +1,3 @@
-use enum_as_inner::EnumAsInner;
 use miniserde::json::Object;
 use simple_error::{box_err, SimpleResult};
 
@@ -19,7 +18,7 @@ use crate::message_parsing::critical_error_message::CriticalErrorMessage;
 use crate::message_parsing::protocol_error_message::ProtocolErrorMessage;
 use crate::message_parsing::notify_user_message::NotifyUserMessage;
 
-#[derive(Debug, Clone, EnumAsInner)]
+#[derive(Debug, Clone)]
 pub enum ParsedTradingViewMessage {
     Ping(usize),    
     ServerHello(ServerHelloMessage),
