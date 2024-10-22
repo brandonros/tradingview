@@ -27,3 +27,5 @@ tradingview_client = { path = "../tradingview_client" }
 csv_scraper = { git = "https://github.com/brandonros/csv_scraper.git", rev = "ce507695de7fe1cb264a518506dbc0df735a1717" }
 # env vars
 dotenvy = "0.15.7"
+# time
+time = { version = "0.3.36", features = ["formatting", "macros"] }

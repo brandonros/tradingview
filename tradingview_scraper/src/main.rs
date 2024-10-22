@@ -29,6 +29,9 @@ async fn async_main(executor: &Arc<Executor<'static>>) -> SimpleResult<()> {
     let session = std::env::var("SESSION")?;
     let timeframe = std::env::var("TIMEFRAME")?;
 
+    // get date
+    let date = utilities::get_current_date()?;
+
     // quote
     let executor_clone = executor.clone();
     let quote_scraper = QuoteScraper {
@@ -36,7 +39,7 @@ async fn async_main(executor: &Arc<Executor<'static>>) -> SimpleResult<()> {
         symbol: symbol.clone(),
         session: session.clone(),
     };
-    let path = format!("{output_dir}/{0}-{1}-quote.csv", quote_scraper.symbol, quote_scraper.session);
+    let path = format!("{output_dir}/{date}-{0}-{1}-quote.csv", quote_scraper.symbol, quote_scraper.session);
     let quote_csv_scraper = CsvScraper::new(&path, quote_scraper).await?;
     let quote_handle = executor.spawn(quote_csv_scraper.scrape(executor_clone, Duration::from_secs(5)));
 
@@ -49,7 +52,7 @@ async fn async_main(executor: &Arc<Executor<'static>>) -> SimpleResult<()> {
         timeframe: timeframe.clone(),
         range: 1,
     };
-    let path = format!("{output_dir}/{0}-{1}-{2}-candle.csv", candle_scraper.symbol, candle_scraper.session, candle_scraper.timeframe);
+    let path = format!("{output_dir}/{date}-{0}-{1}-{2}-candle.csv", candle_scraper.symbol, candle_scraper.session, candle_scraper.timeframe);
     let candle_csv_scraper = CsvScraper::new(&path, candle_scraper).await?;
     let candle_handle = executor.spawn(candle_csv_scraper.scrape(executor_clone, Duration::from_secs(5)));
 
@@ -72,7 +75,7 @@ async fn async_main(executor: &Arc<Executor<'static>>) -> SimpleResult<()> {
             21     
         ),
     };
-    let path = format!("{output_dir}/{0}-{1}-{2}-indicator.csv", indicator_scraper.symbol, indicator_scraper.session, indicator_scraper.timeframe);
+    let path = format!("{output_dir}/{date}-{0}-{1}-{2}-indicator.csv", indicator_scraper.symbol, indicator_scraper.session, indicator_scraper.timeframe);
     let indicator_csv_scraper = CsvScraper::new(&path, indicator_scraper).await?;
     let indicator_handle = executor.spawn(indicator_csv_scraper.scrape(executor_clone, Duration::from_secs(5)));
 
