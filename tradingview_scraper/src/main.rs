@@ -2,7 +2,6 @@ mod config;
 mod quote_scraper;
 mod candle_scraper;
 mod indicator_scraper;
-mod utilities;
 
 use std::sync::Arc;
 use std::time::Duration;
@@ -19,55 +18,89 @@ use crate::quote_scraper::QuoteScraper;
 use crate::config::Config;
 
 async fn spawn_quote_csv_scraper(executor: Arc<Executor<'static>>, config: Config) -> SimpleResult<()> {
-    let date = utilities::get_current_date()?;
+    // build scraper
+    let quote_scraper = QuoteScraper::new(
+        config.auth_token.clone(),
+        config.symbol.clone(),
+        config.session.clone(),
+    );
+
+    // spawn
+    let client = quote_scraper.client.clone();
     let executor_clone = executor.clone();
-    let quote_scraper = QuoteScraper {
-        auth_token: config.auth_token.clone(),
-        symbol: config.symbol.clone(),
-        session: config.session.clone(),
-    };
+    let handle = executor.spawn(async move {
+        client.subscribe(executor_clone).await
+    });
+    handle.detach();
+
+    // build csv scraper
+    let date = tradingview_common::utilities::get_current_date()?;
     let path = format!("{0}/{date}-{1}-{2}-quote.csv", config.output_dir, quote_scraper.symbol, quote_scraper.session);
     let quote_csv_scraper = CsvScraper::new(&path, quote_scraper).await?;
+    let executor_clone = executor.clone();
     quote_csv_scraper.scrape(executor_clone, Duration::from_secs(5)).await
 }
 
 async fn spawn_candle_csv_scraper(executor: Arc<Executor<'static>>, config: Config) -> SimpleResult<()> {
-    let date = utilities::get_current_date()?;
+    // build scraper
+    let candle_scraper = CandleScraper::new(
+        config.auth_token.clone(),
+        config.symbol.clone(),
+        config.session.clone(),
+        config.timeframe.clone(),
+        1,
+    );
+
+    // spawn
+    let client = candle_scraper.client.clone();
     let executor_clone = executor.clone();
-    let candle_scraper = CandleScraper {
-        auth_token: config.auth_token.clone(),
-        symbol: config.symbol.clone(),
-        session: config.session.clone(),
-        timeframe: config.timeframe.clone(),
-        range: 1,
-    };
+    let handle = executor.spawn(async move {
+        client.subscribe(executor_clone).await
+    });
+    handle.detach();
+
+    // build csv scraper
+    let date = tradingview_common::utilities::get_current_date()?;
     let path = format!("{0}/{date}-{1}-{2}-{3}-candle.csv", config.output_dir, candle_scraper.symbol, candle_scraper.session, candle_scraper.timeframe);
     let candle_csv_scraper = CsvScraper::new(&path, candle_scraper).await?;
+    let executor_clone = executor.clone();
     candle_csv_scraper.scrape(executor_clone, Duration::from_secs(5)).await
 }
 
 async fn spawn_indicator_csv_scraper(executor: Arc<Executor<'static>>, config: Config) -> SimpleResult<()> {
-    let date = utilities::get_current_date()?;
+    // build scraper
+    let indicator = TradingViewIndicators::generate_vwap_mvwap_ema_crossover(
+        1,
+        "close".to_string(),
+        7,
+        "close".to_string(),
+        25,
+        65,
+        51,
+        21     
+    );
+    let indicator_scraper = IndicatorScraper::new(
+        config.auth_token.clone(),
+        config.symbol.clone(),
+        config.session.clone(),
+        config.timeframe.clone(),
+        1,
+        indicator
+    );
+
+    // spawn
+    let client = indicator_scraper.client.clone();
     let executor_clone = executor.clone();
-    let indicator_scraper = IndicatorScraper {
-        auth_token: config.auth_token.clone(),
-        symbol: config.symbol.clone(),
-        session: config.session.clone(),
-        timeframe: config.timeframe.clone(),
-        range: 1,
-        indicator: TradingViewIndicators::generate_vwap_mvwap_ema_crossover(
-            1,
-            "close".to_string(),
-            7,
-            "close".to_string(),
-            25,
-            65,
-            51,
-            21     
-        ),
-    };
+    let handle = executor.spawn(async move {
+        client.subscribe(executor_clone).await
+    });
+    handle.detach();
+
+    // build csv scraper
+    let date = tradingview_common::utilities::get_current_date()?;
     let path = format!("{0}/{date}-{1}-{2}-{3}-indicator.csv", config.output_dir, indicator_scraper.symbol, indicator_scraper.session, indicator_scraper.timeframe);
     let indicator_csv_scraper = CsvScraper::new(&path, indicator_scraper).await?;
+    let executor_clone = executor.clone();    
     indicator_csv_scraper.scrape(executor_clone, Duration::from_secs(5)).await
 }
 

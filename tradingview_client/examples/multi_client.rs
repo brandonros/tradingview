@@ -1,10 +1,11 @@
 use std::sync::Arc;
 use std::time::Duration;
 
+use async_lock::RwLock;
 use simple_error::SimpleResult;
 use async_executor::{with_thread_pool, Executor};
 use tradingview_common::{TradingViewClientConfig, TradingViewIndicators, TradingViewSymbols};
-use tradingview_client::{DefaultTradingViewMessageProcessor, TradingViewClient, TradingViewMessageProcessor};
+use tradingview_client::{LoggingMessageProcessor, TradingViewClient};
 
 async fn async_main(executor: &Arc<Executor<'static>>) -> SimpleResult<()> {
     // init logging
@@ -15,8 +16,8 @@ async fn async_main(executor: &Arc<Executor<'static>>) -> SimpleResult<()> {
     let auth_token = std::env::var("AUTH_TOKEN").expect("failed to get AUTH_TOKEN");
 
     // build message processor
-    let message_processor1: Arc<Box<dyn TradingViewMessageProcessor + Send + Sync>> = Arc::new(Box::new(DefaultTradingViewMessageProcessor {}));
-    let message_processor2: Arc<Box<dyn TradingViewMessageProcessor + Send + Sync>> = Arc::new(Box::new(DefaultTradingViewMessageProcessor {}));
+    let message_processor1 = Arc::new(RwLock::new(LoggingMessageProcessor::default()));
+    let message_processor2 = Arc::new(RwLock::new(LoggingMessageProcessor::default()));
         
     // build clients
     let vwap_mvwap_ema_crossover = TradingViewIndicators::generate_vwap_mvwap_ema_crossover(

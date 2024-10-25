@@ -5,6 +5,7 @@ mod parsed_message;
 mod json_utilities;
 mod indicators;
 mod symbols;
+pub mod utilities;
 
 pub use client_config::*;
 pub use scrape_result::*;
@@ -12,4 +13,4 @@ pub use indicators::*;
 pub use symbols::*;
 pub use parsed_message::*;
 pub use message_parsing::*;
-
+pub use utilities::*;

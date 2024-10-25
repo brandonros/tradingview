@@ -10,3 +10,5 @@ miniserde = "0.1.40"
 simple_error = { git = "https://github.com/brandonros/simple_error.git" }
 # logging
 log = "0.4.22"
+# time
+time = { version = "0.3.36", features = ["formatting", "macros"] }

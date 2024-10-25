@@ -1,25 +1,26 @@
 use std::error::Error;
 
-use miniserde::{json::{Number, Object}, Deserialize, Serialize};
+use miniserde::json::Object;
+use miniserde::{Deserialize, Serialize};
 use simple_error::{box_err, SimpleResult};
 
 use crate::{json_utilities, ParsedTradingViewMessage};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SeriesUpdate {
-    pub index: Number,
-    pub timestamp: Number,
-    pub open: Number,
-    pub high: Number,
-    pub low: Number,
-    pub close: Number,
-    pub volume: Number,
+    pub index: u64,
+    pub timestamp: u64,
+    pub open: f64,
+    pub high: f64,
+    pub low: f64,
+    pub close: f64,
+    pub volume: f64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct StudyUpdate {
-    pub index: Number,
-    pub values: Vec<Number>,
+    pub index: u64,
+    pub values: Vec<f64>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -53,19 +54,19 @@ impl DataUpdateMessage {
                     
                     // pluck i (index)
                     let i = element.get("i").expect("failed to get i");
-                    let i = json_utilities::value_to_number(i).expect("failed to cast");
+                    let i = json_utilities::value_to_u64_cast(i).expect("failed to cast");
 
                     // pluck v (values)
                     let v = element.get("v").expect("failed to get v");
                     let v = json_utilities::value_to_array(v).expect("failed to cast");
 
                     // pluck out of values
-                    let timestamp = json_utilities::value_to_number(&v[0]).expect("failed to cast");
-                    let open = json_utilities::value_to_number(&v[1]).expect("failed to cast");
-                    let high = json_utilities::value_to_number(&v[2]).expect("failed to cast");
-                    let low = json_utilities::value_to_number(&v[3]).expect("failed to cast");
-                    let close = json_utilities::value_to_number(&v[4]).expect("failed to cast");
-                    let volume = json_utilities::value_to_number(&v[5]).expect("failed to cast");
+                    let timestamp = json_utilities::value_to_u64_cast(&v[0]).expect("failed to cast");
+                    let open = json_utilities::value_to_f64_cast(&v[1]).expect("failed to cast");
+                    let high = json_utilities::value_to_f64_cast(&v[2]).expect("failed to cast");
+                    let low = json_utilities::value_to_f64_cast(&v[3]).expect("failed to cast");
+                    let close = json_utilities::value_to_f64_cast(&v[4]).expect("failed to cast");
+                    let volume = json_utilities::value_to_f64_cast(&v[5]).expect("failed to cast");
 
                     // return
                     SeriesUpdate {
@@ -104,12 +105,12 @@ impl DataUpdateMessage {
 
                 // pluck i (index)
                 let i = element.get("i").expect("failed to get i");
-                let i = json_utilities::value_to_number(i).expect("failed to cast");
+                let i = json_utilities::value_to_u64_cast(i).expect("failed to cast");
 
                 // pluck v (values)
                 let v = element.get("v").expect("failed to get v");
                 let v = json_utilities::value_to_array(v).expect("failed to cast");
-                let v = v.iter().map(|value| json_utilities::value_to_number(value).expect("failed to cast")).collect::<Vec<_>>();
+                let v = v.iter().map(|value| json_utilities::value_to_f64_cast(value).expect("failed to cast")).collect::<Vec<_>>();
                 StudyUpdate {
                     index: i,
                     values: v

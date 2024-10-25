@@ -27,18 +27,18 @@ use tradingview_common::{
 };
 
 use crate::client_utilities;
-use crate::utilities;
+use crate::message_utilities;
 use crate::reader::TradingViewReader;
 use crate::writer::TradingViewWriter;
 use crate::message_processor::TradingViewMessageProcessor;
 
 pub struct TradingViewClient {
     config: TradingViewClientConfig,
-    message_processor: Arc<Box<dyn TradingViewMessageProcessor + Send + Sync>>
+    message_processor: Arc<RwLock<dyn TradingViewMessageProcessor + Send + Sync>>
 }
 
 impl TradingViewClient {
-    pub fn new(config: TradingViewClientConfig, message_processor: Arc<Box<dyn TradingViewMessageProcessor + Send + Sync>>) -> Self {
+    pub fn new(config: TradingViewClientConfig, message_processor: Arc<RwLock<dyn TradingViewMessageProcessor + Send + Sync>>) -> Self {
         Self {
             config,
             message_processor
@@ -255,80 +255,7 @@ impl TradingViewClient {
         Ok((tv_reader, tv_writer))
     }
 
-    pub async fn scrape(&self, executor: Arc<Executor<'static>>) -> SimpleResult<TradingViewScrapeResult> {
-        // connect
-        let (mut tv_reader, mut tv_writer) = self.connect().await?;
-
-        // prepare buffer + references + scrape result
-        let buffer: Vec<TradingViewMessageWrapper> = Vec::new();
-        let buffer = RwLock::new(buffer);
-        let buffer_arc = Arc::new(buffer);
-        let mut scrape_result = TradingViewScrapeResult::new();
-
-        // Spawn the reader task
-        let reader_handle_buffer_ref = buffer_arc.clone();
-        let _reader_handle = executor.spawn(async move {
-            loop {
-                match tv_reader.read_message().await {
-                    Ok(result) => {
-                        match result {
-                            Some(message) => {
-                                // add message to buffer
-                                let mut write_lock = reader_handle_buffer_ref.write().await;
-                                write_lock.push(message);
-                                drop(write_lock);
-                            },
-                            None => {
-                                log::warn!("received none");
-                                break;
-                            }
-                        }
-                    },
-                    Err(err) => panic!("{err:?}"),
-                }
-            }
-        });
-        
-        // Wait for server hello message with timeout
-        let server_hello_message: ServerHelloMessage = client_utilities::wait_for_typed_message_with_timeout(
-            Duration::from_secs(5),
-            buffer_arc.clone(),
-            |message| message.payload.contains("javastudies")
-        ).await?;
-        log::debug!("server_hello_message = {server_hello_message:?}");
-        scrape_result.server_hello_messages.push(server_hello_message.clone());
-
-        // set auth token
-        tv_writer.set_auth_token(&self.config.auth_token).await?;
-        
-        // set locale
-        tv_writer.set_locale("en", "US").await?;
-
-        // handle chart symbols
-        self.handle_chart_symbols(&mut tv_writer, &buffer_arc, &mut scrape_result).await?;
-
-        // handle quote symbols
-        self.handle_quote_symbols(&mut tv_writer, &buffer_arc, &mut scrape_result).await?;
-
-        // request more data from series?
-        /*for _ in 0..20 {
-            tv_writer.request_more_data(chart_session_id1, series_id, 1000).await?;
-
-            // TODO: wait for individual sries_loading / study_loading / study_completed messages
-
-            async_io::Timer::after(Duration::from_secs(1)).await;
-        }*/
-
-        // TODO: make sure buffer is empty (no missed message extraction)
-
-        // close socket?
-        tv_writer.close().await?;
-
-        // return
-        return Ok(scrape_result);
-    }
-
-    pub async fn subscribe(&self, executor: Arc<Executor<'static>>) -> SimpleResult<TradingViewScrapeResult> {
+    pub async fn subscribe(&self, executor: Arc<Executor<'static>>) -> SimpleResult<()> {
         // connect
         let (mut tv_reader, mut tv_writer) = self.connect().await?;
 
@@ -394,20 +321,25 @@ impl TradingViewClient {
 
         // read all messages
         loop {
-            let result = utilities::wait_for_message(buffer_arc.clone(), |_| true).await;
+            let result = message_utilities::wait_for_message(buffer_arc.clone(), |_| true).await;
             match result {
                 Some(message) => {
+                    // parse message
                     let parsed_message = ParsedTradingViewMessage::from_string(&message.payload)?;
+
+                    // respond to ping
                     match &parsed_message {
                         ParsedTradingViewMessage::Ping(nonce) => {
                             log::debug!("ping nonce = {nonce}");
                             tv_writer.pong(*nonce).await?;
                         },
-                        _ => {
-                            // send to message processor
-                            self.message_processor.process_message(self.config.name.clone(), parsed_message).await;
-                        }
+                        _ => ()
                     }
+
+                    // process message
+                    let mut message_processor = self.message_processor.write().await;
+                    message_processor.process_message(self.config.name.clone(), parsed_message).await?;
+                    drop(message_processor);
                 },
                 None => panic!("closed")
             }

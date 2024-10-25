@@ -5,7 +5,7 @@ use simple_error::{box_err, SimpleResult};
 use tradingview_codec::TradingViewMessageWrapper;
 use tradingview_common::ParsedTradingViewMessage;
 
-use crate::utilities;
+use crate::message_utilities;
 
 pub async fn wait_for_typed_message_with_timeout<T, F>(
     timeout: Duration,
@@ -16,7 +16,7 @@ where
     F: Fn(&TradingViewMessageWrapper) -> bool + Send + 'static,
     T: TryFrom<ParsedTradingViewMessage>,
 {
-    let message = utilities::wait_for_message_with_timeout(timeout, buffer, predicate).await?;
+    let message = message_utilities::wait_for_message_with_timeout(timeout, buffer, predicate).await?;
     message
         .parsed_message
         .try_into()

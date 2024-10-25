@@ -22,13 +22,6 @@ pub fn value_to_object(input: &Value) -> SimpleResult<Object> {
     }
 }
 
-pub fn value_to_number(input: &Value) -> SimpleResult<Number> {
-    match input {
-        Value::Number(value) => Ok(value.clone()),
-        _ => Err(box_err!("parsing failed"))
-    }
-}
-
 pub fn value_to_f64_cast(input: &Value) -> SimpleResult<f64> {
     match input {
         Value::Number(value) => {
